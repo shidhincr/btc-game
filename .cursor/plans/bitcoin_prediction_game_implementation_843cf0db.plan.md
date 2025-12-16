@@ -90,25 +90,25 @@ todos:
       - create-fsd-structure
   - id: homepage
     content: "Create HomePage: Landing page that redirects to /sign-in or game board based on auth state"
-    status: pending
+    status: completed
     dependencies:
       - setup-routing
       - auth-feature
   - id: signin-page
     content: "Create SignIn page: Sign In form, redirect to game board on successful auth"
-    status: pending
+    status: completed
     dependencies:
       - setup-routing
       - auth-feature
   - id: signup-page
     content: "Create SignUp page: Sign Up form, redirect to game board on successful registration (no Player creation needed)"
-    status: pending
+    status: completed
     dependencies:
       - setup-routing
       - auth-feature
   - id: app-providers
     content: "Set up app layer: Configure Amplify in main.tsx, RouterProvider with routes in App.tsx"
-    status: pending
+    status: completed
     dependencies:
       - homepage
       - signin-page
@@ -116,7 +116,7 @@ todos:
       - shared-layer
   - id: ui-polish
     content: "Polish UI: Responsive design, dark mode styling, loading states, error handling, animations"
-    status: pending
+    status: in_progress
     dependencies:
       - app-providers
   - id: testing
@@ -127,6 +127,9 @@ todos:
   - id: todo-1765860340941-17ivwajjd
     content: "Unit tests: Set up vitest for unit tests"
     status: completed
+  - id: todo-1765896850575-lrn352xgs
+    content: UI components unit tests
+    status: pending
   - id: todo-1765894919858-sswl9c9sz
     content: Add a link to signUp page from SignIn page. Also add the Logo to both SignIn and SignUp page
     status: pending

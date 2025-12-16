@@ -1,5 +1,4 @@
-import { CheckCircle, XCircle, Minus } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { useGuessStore } from '@/entities/guess/store';
 
@@ -7,9 +6,7 @@ interface GuessResultProps {
   className?: string;
 }
 
-export function GuessResult({
-  className,
-}: GuessResultProps) {
+export function GuessResult({ className }: GuessResultProps) {
   const { currentGuess } = useGuessStore();
 
   if (!currentGuess || currentGuess.status !== 'RESOLVED') {
@@ -19,47 +16,40 @@ export function GuessResult({
   const score = currentGuess.score ?? 0;
   const isWin = score > 0;
   const isLoss = score < 0;
-  const isTie = score === 0;
 
   return (
-    <Card
-      className={cn(
-        'fixed top-4 right-4 z-50 animate-in slide-in-from-top-5',
-        isWin && 'border-green-500 bg-green-50 dark:border-green-600 dark:bg-green-900/20',
-        isLoss && 'border-red-500 bg-red-50 dark:border-red-600 dark:bg-red-900/20',
-        isTie && 'border-gray-400 bg-gray-50 dark:border-gray-500 dark:bg-gray-900/20',
-        className
-      )}
-    >
-      <div className="flex items-center gap-3">
-        {isWin && (
-          <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-        )}
-        {isLoss && (
-          <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-        )}
-        {isTie && (
-          <Minus className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-        )}
-
-        <div className="flex flex-col">
-          <span
-            className={cn(
-              'font-semibold',
-              isWin && 'text-green-800 dark:text-green-200',
-              isLoss && 'text-red-800 dark:text-red-200',
-              isTie && 'text-gray-800 dark:text-gray-200'
-            )}
-          >
-            {isWin ? 'Win!' : isLoss ? 'Loss' : 'Tie'}
+    <div className={cn('flex h-32 w-32 flex-col items-center justify-center', className)}>
+      <div className="flex flex-col items-center gap-2 transition-all duration-300">
+        {isWin ? (
+          <>
+            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <span className="text-lg font-bold text-green-600 dark:text-green-400">
+              You Won
+            </span>
+            <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+              +{score}
+            </span>
+          </>
+        ) : isLoss ? (
+          <>
+            <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <span className="text-lg font-bold text-red-600 dark:text-red-400">
+              You Lost
           </span>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Score: {score > 0 ? '+' : ''}
+            <span className="text-sm font-semibold text-red-600 dark:text-red-400">
             {score}
           </span>
-        </div>
+          </>
+        ) : (
+          <>
+            <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+            <span className="text-lg font-bold text-gray-600 dark:text-gray-400">
+              Tie
+            </span>
+          </>
+        )}
       </div>
-    </Card>
+    </div>
   );
 }
 

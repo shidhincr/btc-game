@@ -30,7 +30,6 @@ export function useMakeGuess() {
 
   const createGuess = useCallback(
     async (direction: GuessDirection, startPrice: number) => {
-      setLoading(true);
       setError(null);
 
       try {
@@ -73,7 +72,6 @@ export function useMakeGuess() {
         throw new Error('Invalid guess direction');
       }
 
-      setLoading(true);
       setError(null);
 
       try {
@@ -102,7 +100,6 @@ export function useMakeGuess() {
             clearGuess();
           }, 5000);
 
-          setLoading(false);
           return updatedGuess;
         } else {
           throw new Error('Failed to update guess: No data returned');
@@ -113,8 +110,9 @@ export function useMakeGuess() {
             ? error.message
             : 'Failed to resolve guess. Please try again.';
         setError(errorMessage);
-        setLoading(false);
         throw error;
+      } finally {
+        setLoading(false);
       }
     },
     [setLoading, setError, setCurrentGuess, clearGuess, fetchGuesses]

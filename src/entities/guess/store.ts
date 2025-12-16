@@ -9,14 +9,7 @@ interface GuessStore extends GuessState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   clearGuess: () => void;
-  calculateScore: () => number;
   fetchGuesses: () => Promise<Guess[]>;
-}
-
-function calculateScoreFromGuesses(guesses: Guess[]): number {
-  return guesses
-    .filter((guess) => guess.status === 'RESOLVED' && guess.score !== null)
-    .reduce((total, guess) => total + (guess.score ?? 0), 0);
 }
 
 export const useGuessStore = create<GuessStore>((set, get) => ({
@@ -53,17 +46,12 @@ export const useGuessStore = create<GuessStore>((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  clearGuess: () =>
-    set({
+  clearGuess: () => set({
       currentGuess: null,
       error: null,
       isLoading: false,
     }),
 
-  calculateScore: () => {
-    const { guesses } = get();
-    return calculateScoreFromGuesses(guesses);
-  },
 
   fetchGuesses: async () => {
     const { setGuesses, setLoading, setError } = get();

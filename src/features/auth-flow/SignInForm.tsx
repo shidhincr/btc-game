@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { signIn } from 'aws-amplify/auth';
+import { Bitcoin } from 'lucide-react';
 import { useSessionStore } from '@/entities/session/store';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -34,12 +36,23 @@ export function SignInForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-        Sign In
-      </h2>
+    <div className="w-full max-w-md">
+      <div className="flex flex-col items-center mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md">
+            <Bitcoin className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold">
+            Btc<span className="text-orange-500">Guesser</span>
+          </h1>
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Sign In
+        </h2>
+      </div>
 
-      {error && (
+      <Card className="w-full">
+        {error && (
         <div
           className="mb-4 p-3 rounded-md bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"
           role="alert"
@@ -106,7 +119,20 @@ export function SignInForm() {
           {isLoading ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>
-    </Card>
+
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Don't have an account?{' '}
+          <Link
+            to="/sign-up"
+            className="font-medium text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-colors"
+          >
+            Sign Up
+          </Link>
+        </p>
+      </div>
+      </Card>
+    </div>
   );
 }
 

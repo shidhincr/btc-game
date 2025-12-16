@@ -26,11 +26,14 @@ export function SignOutButton() {
     <Button
       onClick={handleSignOut}
       disabled={isLoading}
-      variant="outline"
+      variant="secondary"
       size="sm"
+      className="gap-2"
     >
-      <LogOut className="w-4 h-4 mr-2" />
+      <LogOut className="h-4 w-4" />
+      <span className="hidden sm:inline">
       {isLoading ? 'Signing out...' : 'Sign Out'}
+      </span>
     </Button>
   );
 }

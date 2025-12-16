@@ -1,5 +1,3 @@
-import { History } from 'lucide-react';
-import { Card } from '@/shared/ui/Card';
 import { HistoryList } from '@/features/view-history/HistoryList';
 import { cn } from '@/shared/lib/cn';
 
@@ -9,15 +7,19 @@ interface HistoryPanelProps {
 
 export function HistoryPanel({ className }: HistoryPanelProps) {
   return (
-    <Card className={cn('flex flex-col gap-4', className)}>
-      <div className="flex items-center gap-2 border-b border-gray-200 pb-3 dark:border-gray-700">
-        <History className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <div
+      className={cn(
+        'mt-8 rounded-2xl bg-white p-6 shadow-lg transition-all duration-300 dark:bg-slate-800',
+        className
+      )}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
           History
         </h2>
       </div>
       <HistoryList />
-    </Card>
+    </div>
   );
 }
 
