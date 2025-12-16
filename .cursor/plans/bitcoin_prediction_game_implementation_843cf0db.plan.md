@@ -126,7 +126,7 @@ todos:
       - ui-polish
   - id: todo-1765860340941-17ivwajjd
     content: "Unit tests: Set up vitest for unit tests"
-    status: pending
+    status: completed
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan
