@@ -41,7 +41,7 @@ todos:
       - shared-layer
   - id: auth-feature
     content: "Implement auth-flow feature: Sign Up, Sign In, Sign Out forms with redirect, auth state management"
-    status: pending
+    status: completed
     dependencies:
       - entities-layer
       - create-schema
