@@ -36,7 +36,7 @@ todos:
       - setup-amplify
   - id: entities-layer
     content: "Create entities: bitcoin (Ticker component, store.ts), guess (types, GuessCard, store.ts), score (Scoreboard component, calculated from guesses), session (auth state, store.ts) - all with Zustand stores"
-    status: pending
+    status: completed
     dependencies:
       - shared-layer
   - id: auth-feature

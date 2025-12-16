@@ -1,0 +1,10 @@
+---
+alwaysApply: false
+---
+## Feature-Sliced Design (FSD) Rules
+
+1. **No inline comments**: Do not add inline comments in code. Code should be self-documenting through clear naming and structure.
+
+2. **No barrel files**: Do not use barrel files (index.ts/index.tsx files that re-export modules). Import directly from the module file itself (e.g., `import { Component } from './Component'` instead of `import { Component } from './index'`).
+
+3. **Use path aliases for shared imports**: Always use `@/shared` path alias instead of relative imports when importing from the shared layer (e.g., `import { formatCurrency } from '@/shared/lib/formatCurrency'` instead of `import { formatCurrency } from '../../shared/lib/formatCurrency'`).
