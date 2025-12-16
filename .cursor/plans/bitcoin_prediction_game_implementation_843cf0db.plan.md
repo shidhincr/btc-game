@@ -12,7 +12,7 @@ todos:
       - setup-dependencies
   - id: setup-amplify
     content: Initialize AWS Amplify Gen 2 backend structure, create amplify/backend.ts entry point
-    status: pending
+    status: completed
     dependencies:
       - setup-dependencies
   - id: create-schema
