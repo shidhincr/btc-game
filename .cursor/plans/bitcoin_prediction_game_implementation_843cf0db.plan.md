@@ -27,7 +27,7 @@ todos:
       - setup-amplify
   - id: create-fsd-structure
     content: "Create Feature-Sliced Design directory structure: app/, pages/, widgets/, features/, entities/, shared/"
-    status: pending
+    status: completed
   - id: shared-layer
     content: "Build shared layer: UI components (Button, Card, Skeleton), utilities (formatCurrency, cn), Amplify client instance, Coinbase API service"
     status: pending
