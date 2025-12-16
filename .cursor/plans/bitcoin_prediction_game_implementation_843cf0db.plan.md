@@ -4,7 +4,7 @@ overview: Build a complete Bitcoin price prediction game using React, TypeScript
 todos:
   - id: setup-dependencies
     content: "Install all required dependencies: TailwindCSS, AWS Amplify packages, react-router-dom, Zustand, lucide-react, and utility libraries"
-    status: pending
+    status: completed
   - id: setup-tailwind
     content: Configure TailwindCSS with PostCSS, update index.css with Tailwind directives, enable dark mode
     status: pending
