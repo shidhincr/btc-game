@@ -71,7 +71,7 @@ todos:
       - resolve-guess-feature
   - id: game-board-widget
     content: "Create game-board widget: Compose make-guess, resolve-guess, bitcoin ticker, and scoreboard components"
-    status: pending
+    status: completed
     dependencies:
       - make-guess-feature
       - resolve-guess-feature
@@ -84,7 +84,7 @@ todos:
       - entities-layer
   - id: setup-routing
     content: "Set up react-router-dom: Install dependency, create router.ts with routes (/sign-in, /sign-up), protected route wrapper"
-    status: pending
+    status: completed
     dependencies:
       - setup-dependencies
       - create-fsd-structure
@@ -127,6 +127,9 @@ todos:
   - id: todo-1765860340941-17ivwajjd
     content: "Unit tests: Set up vitest for unit tests"
     status: completed
+  - id: todo-1765894919858-sswl9c9sz
+    content: Add a link to signUp page from SignIn page. Also add the Logo to both SignIn and SignUp page
+    status: pending
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan

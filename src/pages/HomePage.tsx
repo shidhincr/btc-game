@@ -1,7 +1,15 @@
+import { Header } from '@/shared/ui/Header';
+import { Footer } from '@/shared/ui/Footer';
+import { GameBoard } from '@/widgets/game-board/GameBoard';
+
 export function HomePage() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-gray-600 dark:text-gray-400">Home</div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        <GameBoard />
+      </main>
+      <Footer />
     </div>
   );
 }
