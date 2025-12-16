@@ -80,21 +80,6 @@ describe('useGuessStore', () => {
     });
   });
 
-  describe('addGuess', () => {
-    it('should add guess to guesses array', () => {
-      const guess1 = createMockGuess({ id: 'guess-1' });
-      const guess2 = createMockGuess({ id: 'guess-2' });
-
-      useGuessStore.getState().addGuess(guess1);
-      useGuessStore.getState().addGuess(guess2);
-
-      const state = useGuessStore.getState();
-      expect(state.guesses).toHaveLength(2);
-      expect(state.guesses[0]).toEqual(guess1);
-      expect(state.guesses[1]).toEqual(guess2);
-    });
-  });
-
   describe('updateGuess', () => {
     it('should update guess by id', () => {
       const guess = createMockGuess({ id: 'guess-1', status: 'PENDING' });

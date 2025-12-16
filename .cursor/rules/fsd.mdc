@@ -14,3 +14,5 @@ alwaysApply: true
 5. **No styling tests**: Do not write tests that verify CSS classes, styling, or visual appearance. Tests should focus on functionality, behavior, and logic, not implementation details like Tailwind classes or styling properties.
 
 6. **Hooks in `hooks.ts` files**: All custom hooks for a feature should be placed in a `hooks.ts` file within the feature directory. Import hooks directly from `./hooks` (e.g., `import { useMakeGuess } from './hooks'`).
+
+7. **Avoid synchronous setState in Effects**: Do not call setState synchronously within useEffect body. Effects should synchronize with external systems, not update state based on props/state changes. Instead: derive state during rendering, use `queueMicrotask()` to defer state updates, or use refs to track values without causing re-renders. See: https://react.dev/learn/you-might-not-need-an-effect
