@@ -78,7 +78,7 @@ todos:
       - bitcoin-price
   - id: history-feature
     content: "Implement view-history feature: Fetch resolved guesses, display in history panel widget"
-    status: pending
+    status: completed
     dependencies:
       - create-schema
       - entities-layer
@@ -421,7 +421,6 @@ src/
 - `src/entities/session/store.ts` - Zustand store for auth state
 - `src/features/auth-flow/` - Auth forms and logic (uses session store)
 - `src/features/make-guess/` - Guess creation logic (uses guess store)
-- `src/features/resolve-guess/` - Timer and resolution logic (uses guess and score stores)
 - `src/widgets/game-board/GameBoard.tsx` - Main game UI
 - `src/pages/HomePage.tsx` - Landing/home page
 - `src/pages/SignIn.tsx` - Sign In page
