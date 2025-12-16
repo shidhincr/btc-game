@@ -1,0 +1,84 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { SignUp } from './SignUp';
+import { useSessionStore } from '@/entities/session/store';
+
+vi.mock('@/entities/session/store', () => ({
+  useSessionStore: vi.fn(),
+}));
+
+vi.mock('@/features/auth-flow/SignUpForm', () => ({
+  SignUpForm: () => <div data-testid="sign-up-form">SignUpForm</div>,
+}));
+
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+describe('SignUp', () => {
+  const mockCheckAuth = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNavigate.mockClear();
+    vi.mocked(useSessionStore).mockReturnValue({
+      isAuthenticated: false,
+      checkAuth: mockCheckAuth,
+    } as ReturnType<typeof useSessionStore>);
+  });
+
+  const renderWithRouter = () => {
+    return render(
+      <MemoryRouter>
+        <SignUp />
+      </MemoryRouter>
+    );
+  };
+
+  describe('rendering', () => {
+    it('should render SignUpForm component', () => {
+      renderWithRouter();
+      expect(screen.getByTestId('sign-up-form')).toBeInTheDocument();
+    });
+  });
+
+  describe('authentication check', () => {
+    it('should call checkAuth on mount', () => {
+      renderWithRouter();
+      expect(mockCheckAuth).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('redirect behavior', () => {
+    it('should not redirect when not authenticated', () => {
+      vi.mocked(useSessionStore).mockReturnValue({
+        isAuthenticated: false,
+        checkAuth: mockCheckAuth,
+      } as ReturnType<typeof useSessionStore>);
+
+      renderWithRouter();
+      expect(screen.getByTestId('sign-up-form')).toBeInTheDocument();
+    });
+
+    it('should redirect when authenticated', async () => {
+      vi.mocked(useSessionStore).mockReturnValue({
+        isAuthenticated: true,
+        checkAuth: mockCheckAuth,
+      } as ReturnType<typeof useSessionStore>);
+
+      renderWithRouter();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
+      });
+    });
+  });
+});
+

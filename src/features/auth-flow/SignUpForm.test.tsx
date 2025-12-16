@@ -1,0 +1,362 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { SignUpForm } from './SignUpForm';
+import { useSessionStore } from '@/entities/session/store';
+import { signUp, confirmSignUp, signIn } from 'aws-amplify/auth';
+import type { SignUpOutput, ConfirmSignUpOutput, SignInOutput } from 'aws-amplify/auth';
+
+vi.mock('@/entities/session/store', () => ({
+  useSessionStore: vi.fn(),
+}));
+
+vi.mock('aws-amplify/auth', () => ({
+  signUp: vi.fn(),
+  confirmSignUp: vi.fn(),
+  signIn: vi.fn(),
+}));
+
+describe('SignUpForm', () => {
+  const mockCheckAuth = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useSessionStore).mockReturnValue({
+      checkAuth: mockCheckAuth,
+    } as ReturnType<typeof useSessionStore>);
+  });
+
+  describe('rendering', () => {
+    it('should render sign up form', () => {
+      render(<SignUpForm />);
+      expect(screen.getByRole('heading', { name: 'Sign Up' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Password')).toBeInTheDocument();
+      expect(screen.getByLabelText('Confirm Password')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Sign Up' })).toBeInTheDocument();
+    });
+
+    it('should show confirmation code input when needsConfirmation is true', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Confirmation Code')).toBeInTheDocument();
+        expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Confirm Password')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('password validation', () => {
+    it('should show password errors on blur', async () => {
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+
+      await userEvent.type(passwordInput, 'weak');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText(/At least 8 characters/)).toBeInTheDocument();
+        expect(screen.getByText(/At least 1 digit/)).toBeInTheDocument();
+        expect(screen.getByText(/At least 1 uppercase letter/)).toBeInTheDocument();
+        expect(screen.getByText(/At least 1 symbol/)).toBeInTheDocument();
+      });
+    });
+
+    it('should show success message when password meets all requirements', async () => {
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+
+      await userEvent.type(passwordInput, 'Password123!');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText('Password meets all requirements')).toBeInTheDocument();
+      });
+    });
+
+    it('should show required message when password is empty after blur', async () => {
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+
+      await userEvent.click(passwordInput);
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText('Password is required')).toBeInTheDocument();
+      });
+    });
+
+    it('should validate password on submit', async () => {
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'weak');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'weak');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Password must contain:/)).toBeInTheDocument();
+        expect(signUp).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('confirm password validation', () => {
+    it('should show error when passwords do not match after blur', async () => {
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+      const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+
+      await userEvent.type(passwordInput, 'Password123!');
+      await userEvent.type(confirmPasswordInput, 'Different123!');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText('Passwords do not match')).toBeInTheDocument();
+      });
+    });
+
+    it('should show success when passwords match after blur', async () => {
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+      const confirmPasswordInput = screen.getByLabelText('Confirm Password');
+
+      await userEvent.type(passwordInput, 'Password123!');
+      await userEvent.type(confirmPasswordInput, 'Password123!');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText('Passwords match')).toBeInTheDocument();
+      });
+    });
+
+    it('should prevent submission when passwords do not match', async () => {
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Different123!');
+
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getAllByText('Passwords do not match').length).toBeGreaterThan(0);
+      });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(signUp).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('form submission - initial sign up', () => {
+    it('should call signUp with correct data on submit', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(signUp).toHaveBeenCalledWith({
+          username: 'test@example.com',
+          password: 'Password123!',
+          options: {
+            userAttributes: {
+              email: 'test@example.com',
+            },
+          },
+        });
+      });
+    });
+
+    it('should show confirmation code input after successful sign up', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Confirmation Code')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Confirm Sign Up' })).toBeInTheDocument();
+      });
+    });
+
+    it('should disable email input when confirmation is needed', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        const emailInput = screen.getByLabelText('Email');
+        expect(emailInput).toBeDisabled();
+      });
+    });
+  });
+
+  describe('form submission - confirmation', () => {
+    beforeEach(async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Confirmation Code')).toBeInTheDocument();
+      });
+    });
+
+    it('should call confirmSignUp with correct code', async () => {
+      vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
+      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
+
+      await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
+
+      await waitFor(() => {
+        expect(confirmSignUp).toHaveBeenCalledWith({
+          username: 'test@example.com',
+          confirmationCode: '123456',
+        });
+      });
+    });
+
+    it('should call signIn after successful confirmation', async () => {
+      vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
+      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
+
+      await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
+
+      await waitFor(() => {
+        expect(signIn).toHaveBeenCalledWith({
+          username: 'test@example.com',
+          password: 'Password123!',
+        });
+      });
+    });
+
+    it('should call checkAuth after successful sign in', async () => {
+      vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
+      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
+
+      await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
+
+      await waitFor(() => {
+        expect(mockCheckAuth).toHaveBeenCalled();
+      });
+    });
+
+    it('should display error on confirmation failure', async () => {
+      const errorMessage = 'Invalid confirmation code';
+      vi.mocked(confirmSignUp).mockRejectedValue(new Error(errorMessage));
+
+      await userEvent.type(screen.getByLabelText('Confirmation Code'), 'wrong');
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    it('should display error message on sign up failure', async () => {
+      const errorMessage = 'Email already exists';
+      vi.mocked(signUp).mockRejectedValue(new Error(errorMessage));
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      });
+    });
+
+    it('should clear password errors on submit', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      render(<SignUpForm />);
+      const passwordInput = screen.getByLabelText('Password');
+
+      await userEvent.type(passwordInput, 'weak');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(screen.getByText(/At least 8 characters/)).toBeInTheDocument();
+      });
+
+      await userEvent.type(passwordInput, 'Password123!');
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.queryByText(/At least 8 characters/)).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('loading states', () => {
+    it('should show loading state during sign up', async () => {
+      vi.mocked(signUp).mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      );
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      expect(screen.getByRole('button', { name: 'Processing...' })).toBeInTheDocument();
+    });
+
+    it('should show loading state during confirmation', async () => {
+      vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
+      vi.mocked(confirmSignUp).mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      );
+      render(<SignUpForm />);
+
+      await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
+      await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
+      await userEvent.type(screen.getByLabelText('Confirm Password'), 'Password123!');
+      await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Confirmation Code')).toBeInTheDocument();
+      });
+
+      await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
+      await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
+
+      expect(screen.getByRole('button', { name: 'Processing...' })).toBeInTheDocument();
+    });
+  });
+});
+
