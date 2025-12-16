@@ -7,7 +7,7 @@ todos:
     status: completed
   - id: setup-tailwind
     content: Configure TailwindCSS with PostCSS, update index.css with Tailwind directives, enable dark mode
-    status: pending
+    status: completed
     dependencies:
       - setup-dependencies
   - id: setup-amplify
