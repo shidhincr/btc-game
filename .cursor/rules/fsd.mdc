@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 ## Feature-Sliced Design (FSD) Rules
 
@@ -12,3 +12,5 @@ alwaysApply: false
 4. **Use pnpm for package management**: Always use `pnpm` instead of `npm` for installing dependencies, running scripts, and other package management tasks (e.g., `pnpm install`, `pnpm test`, `pnpm dev`).
 
 5. **No styling tests**: Do not write tests that verify CSS classes, styling, or visual appearance. Tests should focus on functionality, behavior, and logic, not implementation details like Tailwind classes or styling properties.
+
+6. **Hooks in `hooks.ts` files**: All custom hooks for a feature should be placed in a `hooks.ts` file within the feature directory. Import hooks directly from `./hooks` (e.g., `import { useMakeGuess } from './hooks'`).

@@ -48,19 +48,19 @@ todos:
       - setup-routing
   - id: bitcoin-price
     content: "Implement Bitcoin price display: Coinbase API integration, auto-refresh every 60s, Ticker component"
-    status: pending
+    status: in_progress
     dependencies:
       - entities-layer
       - shared-layer
   - id: make-guess-feature
     content: "Implement make-guess feature: UP/DOWN buttons, guess creation using client.models.Guess.create(), button disable logic, locked price display"
-    status: pending
+    status: completed
     dependencies:
       - entities-layer
       - create-schema
   - id: resolve-guess-feature
     content: "Implement resolve-guess feature: 60s countdown timer, client-side resolution logic (Win/Loss/Tie), score calculation, Guess update using client.models.Guess.update()"
-    status: pending
+    status: completed
     dependencies:
       - make-guess-feature
       - bitcoin-price
