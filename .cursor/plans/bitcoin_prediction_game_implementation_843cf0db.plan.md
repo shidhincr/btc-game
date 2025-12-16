@@ -22,7 +22,7 @@ todos:
       - setup-amplify
   - id: setup-auth
     content: Configure AWS Cognito authentication in amplify/auth/resource.ts with email/password
-    status: pending
+    status: completed
     dependencies:
       - setup-amplify
   - id: create-fsd-structure
