@@ -17,7 +17,7 @@ todos:
       - setup-dependencies
   - id: create-schema
     content: Define Amplify Data schema in amplify/data/resource.ts with Guess model only (no Player model - score calculated from guesses), owner authorization (ORM approach)
-    status: pending
+    status: completed
     dependencies:
       - setup-amplify
   - id: setup-auth
