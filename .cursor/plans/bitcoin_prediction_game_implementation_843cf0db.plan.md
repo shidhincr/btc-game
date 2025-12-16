@@ -30,7 +30,7 @@ todos:
     status: completed
   - id: shared-layer
     content: "Build shared layer: UI components (Button, Card, Skeleton), utilities (formatCurrency, cn), Amplify client instance, Coinbase API service"
-    status: pending
+    status: completed
     dependencies:
       - create-fsd-structure
       - setup-amplify
@@ -124,6 +124,9 @@ todos:
     status: pending
     dependencies:
       - ui-polish
+  - id: todo-1765860340941-17ivwajjd
+    content: "Unit tests: Set up vitest for unit tests"
+    status: pending
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan
