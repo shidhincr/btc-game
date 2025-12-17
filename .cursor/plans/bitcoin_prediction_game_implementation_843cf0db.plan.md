@@ -130,9 +130,12 @@ todos:
   - id: todo-1765896850575-lrn352xgs
     content: UI components unit tests
     status: pending
+  - id: todo-1765905131625-9n0etq5m7
+    content: Update the Ticker price in every 10 seconds.
+    status: completed
   - id: todo-1765894919858-sswl9c9sz
     content: Add a link to signUp page from SignIn page. Also add the Logo to both SignIn and SignUp page
-    status: pending
+    status: completed
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan
