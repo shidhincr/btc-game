@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { SignUpForm } from './SignUpForm';
 import { useSessionStore } from '@/entities/session/store';
 import { signUp, confirmSignUp, signIn } from 'aws-amplify/auth';
@@ -26,9 +27,13 @@ describe('SignUpForm', () => {
     } as ReturnType<typeof useSessionStore>);
   });
 
+  const renderWithRouter = (component: React.ReactElement) => {
+    return render(<MemoryRouter>{component}</MemoryRouter>);
+  };
+
   describe('rendering', () => {
     it('should render sign up form', () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       expect(screen.getByRole('heading', { name: 'Sign Up' })).toBeInTheDocument();
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
@@ -38,7 +43,7 @@ describe('SignUpForm', () => {
 
     it('should show confirmation code input when needsConfirmation is true', async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -55,7 +60,7 @@ describe('SignUpForm', () => {
 
   describe('password validation', () => {
     it('should show password errors on blur', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
 
       await userEvent.type(passwordInput, 'weak');
@@ -70,7 +75,7 @@ describe('SignUpForm', () => {
     });
 
     it('should show success message when password meets all requirements', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
 
       await userEvent.type(passwordInput, 'Password123!');
@@ -82,7 +87,7 @@ describe('SignUpForm', () => {
     });
 
     it('should show required message when password is empty after blur', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
 
       await userEvent.click(passwordInput);
@@ -94,7 +99,7 @@ describe('SignUpForm', () => {
     });
 
     it('should validate password on submit', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'weak');
@@ -110,7 +115,7 @@ describe('SignUpForm', () => {
 
   describe('confirm password validation', () => {
     it('should show error when passwords do not match after blur', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
       const confirmPasswordInput = screen.getByLabelText('Confirm Password');
 
@@ -124,7 +129,7 @@ describe('SignUpForm', () => {
     });
 
     it('should show success when passwords match after blur', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
       const confirmPasswordInput = screen.getByLabelText('Confirm Password');
 
@@ -138,7 +143,7 @@ describe('SignUpForm', () => {
     });
 
     it('should prevent submission when passwords do not match', async () => {
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -161,7 +166,7 @@ describe('SignUpForm', () => {
   describe('form submission - initial sign up', () => {
     it('should call signUp with correct data on submit', async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -183,7 +188,7 @@ describe('SignUpForm', () => {
 
     it('should show confirmation code input after successful sign up', async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -198,7 +203,7 @@ describe('SignUpForm', () => {
 
     it('should disable email input when confirmation is needed', async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -215,7 +220,7 @@ describe('SignUpForm', () => {
   describe('form submission - confirmation', () => {
     beforeEach(async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -286,7 +291,7 @@ describe('SignUpForm', () => {
     it('should display error message on sign up failure', async () => {
       const errorMessage = 'Email already exists';
       vi.mocked(signUp).mockRejectedValue(new Error(errorMessage));
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -300,7 +305,7 @@ describe('SignUpForm', () => {
 
     it('should clear password errors on submit', async () => {
       vi.mocked(signUp).mockResolvedValue({} as SignUpOutput);
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
       const passwordInput = screen.getByLabelText('Password');
 
       await userEvent.type(passwordInput, 'weak');
@@ -326,7 +331,7 @@ describe('SignUpForm', () => {
       vi.mocked(signUp).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');
@@ -341,7 +346,7 @@ describe('SignUpForm', () => {
       vi.mocked(confirmSignUp).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
-      render(<SignUpForm />);
+      renderWithRouter(<SignUpForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'Password123!');

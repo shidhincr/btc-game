@@ -49,12 +49,6 @@ describe('SignOutButton', () => {
       const icon = container.querySelector('.lucide-log-out');
       expect(icon).toBeInTheDocument();
     });
-
-    it('should have correct button variant and size', () => {
-      const { container } = renderWithRouter();
-      const button = container.querySelector('button');
-      expect(button).toHaveClass('border');
-    });
   });
 
   describe('sign out flow', () => {

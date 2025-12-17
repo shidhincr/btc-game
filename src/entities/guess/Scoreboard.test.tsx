@@ -2,21 +2,32 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Scoreboard } from './Scoreboard';
 import { useGuessStore } from './store';
+import type { Guess } from './types';
 
 vi.mock('./store', () => ({
   useGuessStore: vi.fn(),
 }));
 
-describe('Scoreboard', () => {
-  const mockCalculateScore = vi.fn();
+const createMockGuess = (overrides?: Partial<Guess>): Guess => ({
+  id: 'guess-1',
+  startPrice: 50000,
+  direction: 'UP',
+  status: 'RESOLVED',
+  resolvedPrice: 51000,
+  score: 1,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrides,
+});
 
+describe('Scoreboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   const mockStore = (overrides: Partial<ReturnType<typeof useGuessStore>> = {}) => {
     vi.mocked(useGuessStore).mockReturnValue({
-      calculateScore: mockCalculateScore,
+      guesses: [],
       isLoading: false,
       error: null,
       ...overrides,
@@ -24,43 +35,56 @@ describe('Scoreboard', () => {
   };
 
   describe('score display', () => {
-    it('should display positive score with plus sign', () => {
-      mockStore();
-      mockCalculateScore.mockReturnValue(5);
+    it('should display positive score', () => {
+      mockStore({
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 5 }),
+        ],
+      });
       render(<Scoreboard />);
 
-      expect(screen.getByText('+5')).toBeInTheDocument();
+      expect(screen.getByText('5')).toBeInTheDocument();
     });
 
-    it('should display negative score without plus sign', () => {
-      mockStore();
-      mockCalculateScore.mockReturnValue(-3);
+    it('should display negative score', () => {
+      mockStore({
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: -3 }),
+        ],
+      });
       render(<Scoreboard />);
 
       expect(screen.getByText('-3')).toBeInTheDocument();
     });
 
     it('should display zero score', () => {
-      mockStore();
-      mockCalculateScore.mockReturnValue(0);
+      mockStore({
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 0 }),
+        ],
+      });
       render(<Scoreboard />);
 
       expect(screen.getByText('0')).toBeInTheDocument();
     });
 
-    it('should call calculateScore from store', () => {
-      mockStore();
-      mockCalculateScore.mockReturnValue(10);
+    it('should calculate score from resolved guesses', () => {
+      mockStore({
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 5 }),
+          createMockGuess({ id: 'guess-2', status: 'RESOLVED', score: -2 }),
+          createMockGuess({ id: 'guess-3', status: 'PENDING', score: null }),
+        ],
+      });
       render(<Scoreboard />);
 
-      expect(mockCalculateScore).toHaveBeenCalled();
+      expect(screen.getByText('3')).toBeInTheDocument();
     });
   });
 
   describe('loading state', () => {
     it('should show loading spinner when loading', () => {
       mockStore({ isLoading: true });
-      mockCalculateScore.mockReturnValue(0);
       const { container } = render(<Scoreboard />);
 
       const spinner = container.querySelector('.animate-spin');
@@ -68,36 +92,46 @@ describe('Scoreboard', () => {
     });
 
     it('should not show score when loading', () => {
-      mockStore({ isLoading: true });
-      mockCalculateScore.mockReturnValue(5);
+      mockStore({
+        isLoading: true,
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 5 }),
+        ],
+      });
       render(<Scoreboard />);
 
-      expect(screen.queryByText('+5')).not.toBeInTheDocument();
+      expect(screen.queryByText('5')).not.toBeInTheDocument();
     });
   });
 
   describe('error state', () => {
     it('should display error message when error exists', () => {
       mockStore({ error: 'Error message' });
-      mockCalculateScore.mockReturnValue(0);
       render(<Scoreboard />);
 
       expect(screen.getByText('Error')).toBeInTheDocument();
     });
 
     it('should not show score when error exists', () => {
-      mockStore({ error: 'Error message' });
-      mockCalculateScore.mockReturnValue(5);
+      mockStore({
+        error: 'Error message',
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 5 }),
+        ],
+      });
       render(<Scoreboard />);
 
-      expect(screen.queryByText('+5')).not.toBeInTheDocument();
+      expect(screen.queryByText('5')).not.toBeInTheDocument();
     });
   });
 
   describe('custom className', () => {
     it('should apply custom className', () => {
-      mockStore();
-      mockCalculateScore.mockReturnValue(0);
+      mockStore({
+        guesses: [
+          createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 0 }),
+        ],
+      });
       const { container } = render(<Scoreboard className="custom-class" />);
 
       expect(container.firstChild).toHaveClass('custom-class');

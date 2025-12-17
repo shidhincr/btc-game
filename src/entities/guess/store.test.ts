@@ -1,6 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGuessStore } from './store';
 import type { Guess } from './types';
+import { client } from '@/shared/api/amplify';
+
+vi.mock('@/shared/api/amplify', () => ({
+  client: {
+    models: {
+      Guess: {
+        list: vi.fn(),
+      },
+    },
+  },
+}));
 
 const createMockGuess = (overrides?: Partial<Guess>): Guess => ({
   id: 'guess-1',
@@ -22,6 +33,7 @@ describe('useGuessStore', () => {
       isLoading: false,
       error: null,
     });
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -171,58 +183,106 @@ describe('useGuessStore', () => {
     });
   });
 
-  describe('calculateScore', () => {
-    it('should return 0 for empty guesses', () => {
-      const score = useGuessStore.getState().calculateScore();
-      expect(score).toBe(0);
+
+  describe('fetchGuesses', () => {
+    it('should fetch and set guesses successfully', async () => {
+      const mockGuesses = [
+        createMockGuess({ id: 'guess-1', createdAt: '2024-01-01T00:00:00Z' }),
+        createMockGuess({ id: 'guess-2', createdAt: '2024-01-02T00:00:00Z' }),
+      ];
+      vi.mocked(client.models.Guess.list).mockResolvedValue({
+        data: mockGuesses,
+      } as any);
+
+      const result = await useGuessStore.getState().fetchGuesses();
+
+      const state = useGuessStore.getState();
+      const sortedGuesses = [...mockGuesses].sort(
+        (a, b) =>
+          new Date(b.createdAt || '').getTime() -
+          new Date(a.createdAt || '').getTime()
+      );
+      expect(state.guesses).toEqual(sortedGuesses);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
+      expect(result).toEqual(sortedGuesses);
     });
 
-    it('should return 0 when no resolved guesses', () => {
-      const guesses = [
-        createMockGuess({ id: 'guess-1', status: 'PENDING' }),
-        createMockGuess({ id: 'guess-2', status: 'PENDING' }),
+    it('should sort guesses by createdAt descending', async () => {
+      const mockGuesses = [
+        createMockGuess({ id: 'guess-1', createdAt: '2024-01-01T00:00:00Z' }),
+        createMockGuess({ id: 'guess-2', createdAt: '2024-01-03T00:00:00Z' }),
+        createMockGuess({ id: 'guess-3', createdAt: '2024-01-02T00:00:00Z' }),
       ];
-      useGuessStore.getState().setGuesses(guesses);
+      vi.mocked(client.models.Guess.list).mockResolvedValue({
+        data: mockGuesses,
+      } as any);
 
-      const score = useGuessStore.getState().calculateScore();
-      expect(score).toBe(0);
+      await useGuessStore.getState().fetchGuesses();
+
+      const state = useGuessStore.getState();
+      expect(state.guesses[0].id).toBe('guess-2');
+      expect(state.guesses[1].id).toBe('guess-3');
+      expect(state.guesses[2].id).toBe('guess-1');
     });
 
-    it('should calculate score from resolved guesses only', () => {
-      const guesses = [
-        createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 1 }),
-        createMockGuess({ id: 'guess-2', status: 'PENDING', score: null }),
-        createMockGuess({ id: 'guess-3', status: 'RESOLVED', score: -1 }),
-        createMockGuess({ id: 'guess-4', status: 'RESOLVED', score: 0 }),
-        createMockGuess({ id: 'guess-5', status: 'RESOLVED', score: 2 }),
-      ];
-      useGuessStore.getState().setGuesses(guesses);
+    it('should set loading state during fetch', async () => {
+      vi.mocked(client.models.Guess.list).mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ data: [] } as any), 100))
+      );
 
-      const score = useGuessStore.getState().calculateScore();
-      expect(score).toBe(2);
+      const fetchPromise = useGuessStore.getState().fetchGuesses();
+      expect(useGuessStore.getState().isLoading).toBe(true);
+
+      await fetchPromise;
+      expect(useGuessStore.getState().isLoading).toBe(false);
     });
 
-    it('should ignore null scores in resolved guesses', () => {
-      const guesses = [
-        createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: 1 }),
-        createMockGuess({ id: 'guess-2', status: 'RESOLVED', score: null }),
-        createMockGuess({ id: 'guess-3', status: 'RESOLVED', score: -1 }),
-      ];
-      useGuessStore.getState().setGuesses(guesses);
+    it('should handle fetch errors', async () => {
+      const errorMessage = 'Failed to fetch guesses';
+      vi.mocked(client.models.Guess.list).mockRejectedValue(new Error(errorMessage));
 
-      const score = useGuessStore.getState().calculateScore();
-      expect(score).toBe(0);
+      await expect(useGuessStore.getState().fetchGuesses()).rejects.toThrow();
+
+      const state = useGuessStore.getState();
+      expect(state.error).toBe(errorMessage);
+      expect(state.isLoading).toBe(false);
     });
 
-    it('should handle negative scores', () => {
-      const guesses = [
-        createMockGuess({ id: 'guess-1', status: 'RESOLVED', score: -5 }),
-        createMockGuess({ id: 'guess-2', status: 'RESOLVED', score: -3 }),
-      ];
-      useGuessStore.getState().setGuesses(guesses);
+    it('should handle non-Error rejections', async () => {
+      vi.mocked(client.models.Guess.list).mockRejectedValue('String error');
 
-      const score = useGuessStore.getState().calculateScore();
-      expect(score).toBe(-8);
+      await expect(useGuessStore.getState().fetchGuesses()).rejects.toBe('String error');
+
+      const state = useGuessStore.getState();
+      expect(state.error).toBe('Failed to fetch guesses. Please try again.');
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should handle null data response', async () => {
+      vi.mocked(client.models.Guess.list).mockResolvedValue({
+        data: null,
+      } as any);
+
+      await expect(useGuessStore.getState().fetchGuesses()).rejects.toThrow(
+        'Failed to fetch guesses: No data returned'
+      );
+
+      const state = useGuessStore.getState();
+      expect(state.error).toBe('Failed to fetch guesses: No data returned');
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should clear error before fetching', async () => {
+      useGuessStore.setState({ error: 'Previous error' });
+      vi.mocked(client.models.Guess.list).mockResolvedValue({
+        data: [],
+      } as any);
+
+      await useGuessStore.getState().fetchGuesses();
+
+      const state = useGuessStore.getState();
+      expect(state.error).toBeNull();
     });
   });
 });

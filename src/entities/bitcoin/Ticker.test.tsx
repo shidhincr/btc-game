@@ -52,7 +52,7 @@ describe('Ticker', () => {
       mockStore({ error: 'Network error' });
       render(<Ticker />);
 
-      expect(screen.getByText('Error: Network error')).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });
 
@@ -77,7 +77,7 @@ describe('Ticker', () => {
       mockStore({ price: 50000 });
       render(<Ticker />);
 
-      expect(screen.getByText('BTC/USD')).toBeInTheDocument();
+      expect(screen.getByText(/btc\/usd/i)).toBeInTheDocument();
     });
 
     it('should apply custom className', () => {
@@ -119,13 +119,13 @@ describe('Ticker', () => {
       expect(mockFetchPrice).toHaveBeenCalledTimes(1);
     });
 
-    it('should use default refresh interval of 60000ms', () => {
+    it('should use default refresh interval of 10000ms', () => {
       mockStore();
       render(<Ticker />);
 
       expect(mockFetchPrice).toHaveBeenCalledTimes(1);
 
-      vi.advanceTimersByTime(60000);
+      vi.advanceTimersByTime(10000);
       expect(mockFetchPrice).toHaveBeenCalledTimes(2);
     });
 

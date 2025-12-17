@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { SignInForm } from './SignInForm';
 import { useSessionStore } from '@/entities/session/store';
 import { signIn } from 'aws-amplify/auth';
@@ -24,9 +25,13 @@ describe('SignInForm', () => {
     } as ReturnType<typeof useSessionStore>);
   });
 
+  const renderWithRouter = (component: React.ReactElement) => {
+    return render(<MemoryRouter>{component}</MemoryRouter>);
+  };
+
   describe('rendering', () => {
     it('should render sign in form', () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       expect(screen.getByRole('heading', { name: 'Sign In' })).toBeInTheDocument();
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
       expect(screen.getByLabelText('Password')).toBeInTheDocument();
@@ -34,7 +39,7 @@ describe('SignInForm', () => {
     });
 
     it('should render email input with correct attributes', () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const emailInput = screen.getByLabelText('Email');
       expect(emailInput).toHaveAttribute('type', 'email');
       expect(emailInput).toHaveAttribute('required');
@@ -42,7 +47,7 @@ describe('SignInForm', () => {
     });
 
     it('should render password input with correct attributes', () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const passwordInput = screen.getByLabelText('Password');
       expect(passwordInput).toHaveAttribute('type', 'password');
       expect(passwordInput).toHaveAttribute('required');
@@ -52,7 +57,7 @@ describe('SignInForm', () => {
 
   describe('form interactions', () => {
     it('should update email input value', async () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
 
       await userEvent.type(emailInput, 'test@example.com');
@@ -61,7 +66,7 @@ describe('SignInForm', () => {
     });
 
     it('should update password input value', async () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
 
       await userEvent.type(passwordInput, 'password123');
@@ -73,7 +78,7 @@ describe('SignInForm', () => {
       vi.mocked(signIn).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: 'Sign In' });
@@ -92,7 +97,7 @@ describe('SignInForm', () => {
   describe('form submission', () => {
     it('should call signIn with correct credentials on submit', async () => {
       vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -108,7 +113,7 @@ describe('SignInForm', () => {
 
     it('should call checkAuth after successful sign in', async () => {
       vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -123,7 +128,7 @@ describe('SignInForm', () => {
       vi.mocked(signIn).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -135,7 +140,7 @@ describe('SignInForm', () => {
     it('should display error message on sign in failure', async () => {
       const errorMessage = 'Invalid credentials';
       vi.mocked(signIn).mockRejectedValue(new Error(errorMessage));
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'wrongpassword');
@@ -148,7 +153,7 @@ describe('SignInForm', () => {
 
     it('should display generic error message for non-Error failures', async () => {
       vi.mocked(signIn).mockRejectedValue('Unknown error');
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'password123');
@@ -163,7 +168,7 @@ describe('SignInForm', () => {
       vi.mocked(signIn)
         .mockRejectedValueOnce(new Error('First error'))
         .mockResolvedValueOnce({} as SignInOutput);
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');
       await userEvent.type(screen.getByLabelText('Password'), 'wrongpassword');
@@ -184,7 +189,7 @@ describe('SignInForm', () => {
 
   describe('validation', () => {
     it('should prevent submission with empty email', async () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const form = screen.getByRole('button', { name: 'Sign In' }).closest('form');
 
       await userEvent.click(screen.getByRole('button', { name: 'Sign In' }));
@@ -194,7 +199,7 @@ describe('SignInForm', () => {
     });
 
     it('should prevent submission with empty password', async () => {
-      render(<SignInForm />);
+      renderWithRouter(<SignInForm />);
       const form = screen.getByRole('button', { name: 'Sign In' }).closest('form');
 
       await userEvent.type(screen.getByLabelText('Email'), 'test@example.com');

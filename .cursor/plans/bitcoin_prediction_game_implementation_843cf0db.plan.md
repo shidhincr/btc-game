@@ -129,7 +129,7 @@ todos:
     status: completed
   - id: todo-1765896850575-lrn352xgs
     content: UI components unit tests
-    status: pending
+    status: completed
   - id: todo-1765905131625-9n0etq5m7
     content: Update the Ticker price in every 10 seconds.
     status: completed
@@ -138,6 +138,9 @@ todos:
     status: completed
   - id: todo-1765958312403-phsw8mrxr
     content: Add E2E tests using playwright
+    status: pending
+  - id: todo-1765958858485-78lnwol6n
+    content: Dark/Light mode toggler
     status: pending
 ---
 
