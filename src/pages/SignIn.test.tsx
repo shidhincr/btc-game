@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { SignIn } from './SignIn';
+import { AuthCheckRoute } from '@/features/auth-flow/AuthCheckRoute';
 import { useSessionStore } from '@/entities/session/store';
 
 vi.mock('@/entities/session/store', () => ({
@@ -12,13 +13,11 @@ vi.mock('@/features/auth-flow/SignInForm', () => ({
   SignInForm: () => <div data-testid="sign-in-form">SignInForm</div>,
 }));
 
-const mockNavigate = vi.fn();
-
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    Navigate: ({ to }: { to: string }) => <div data-testid="navigate">Navigate to {to}</div>,
   };
 });
 
@@ -27,7 +26,6 @@ describe('SignIn', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockNavigate.mockClear();
     vi.mocked(useSessionStore).mockReturnValue({
       isAuthenticated: false,
       checkAuth: mockCheckAuth,
@@ -36,8 +34,10 @@ describe('SignIn', () => {
 
   const renderWithRouter = () => {
     return render(
-      <MemoryRouter>
-        <SignIn />
+      <MemoryRouter initialEntries={['/sign-in']}>
+        <AuthCheckRoute>
+          <SignIn />
+        </AuthCheckRoute>
       </MemoryRouter>
     );
   };
@@ -65,9 +65,10 @@ describe('SignIn', () => {
 
       renderWithRouter();
       expect(screen.getByTestId('sign-in-form')).toBeInTheDocument();
+      expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
     });
 
-    it('should redirect when authenticated', async () => {
+    it('should redirect to home when authenticated', async () => {
       vi.mocked(useSessionStore).mockReturnValue({
         isAuthenticated: true,
         checkAuth: mockCheckAuth,
@@ -76,7 +77,8 @@ describe('SignIn', () => {
       renderWithRouter();
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
+        expect(screen.getByTestId('navigate')).toBeInTheDocument();
+        expect(screen.getByText('Navigate to /')).toBeInTheDocument();
       });
     });
   });

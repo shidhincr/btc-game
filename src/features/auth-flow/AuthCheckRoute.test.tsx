@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { ProtectedRoute } from './ProtectedRoute';
+import { AuthCheckRoute } from './AuthCheckRoute';
 import { useSessionStore } from '@/entities/session/store';
 
 vi.mock('@/entities/session/store', () => ({
@@ -13,11 +13,10 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     Navigate: ({ to }: { to: string }) => <div data-testid="navigate">Navigate to {to}</div>,
-    useLocation: () => ({ pathname: '/protected' }),
   };
 });
 
-describe('ProtectedRoute', () => {
+describe('AuthCheckRoute', () => {
   const mockCheckAuth = vi.fn();
 
   beforeEach(() => {
@@ -27,9 +26,11 @@ describe('ProtectedRoute', () => {
   const renderWithRouter = ({
     isAuthenticated,
     isLoading,
+    pathname = '/',
   }: {
     isAuthenticated: boolean;
     isLoading: boolean;
+    pathname?: string;
   }) => {
     vi.mocked(useSessionStore).mockReturnValue({
       isAuthenticated,
@@ -38,10 +39,10 @@ describe('ProtectedRoute', () => {
     } as ReturnType<typeof useSessionStore>);
 
     return render(
-      <MemoryRouter>
-        <ProtectedRoute>
-          <div>Protected Content</div>
-        </ProtectedRoute>
+      <MemoryRouter initialEntries={[pathname]}>
+        <AuthCheckRoute>
+          <div>Route Content</div>
+        </AuthCheckRoute>
       </MemoryRouter>
     );
   };
@@ -57,44 +58,48 @@ describe('ProtectedRoute', () => {
     it('should show loading message when isLoading is true', () => {
       renderWithRouter({ isAuthenticated: false, isLoading: true });
       expect(screen.getByText('Loading...')).toBeInTheDocument();
-      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+      expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
 
     it('should not show protected content when loading', () => {
       renderWithRouter({ isAuthenticated: true, isLoading: true });
       expect(screen.getByText('Loading...')).toBeInTheDocument();
-      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+      expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
   });
 
-  describe('unauthenticated state', () => {
+  describe('on protected routes (not /sign-in)', () => {
     it('should redirect to /sign-in when not authenticated', () => {
-      renderWithRouter({ isAuthenticated: false, isLoading: false });
+      renderWithRouter({ isAuthenticated: false, isLoading: false, pathname: '/' });
       expect(screen.getByTestId('navigate')).toBeInTheDocument();
       expect(screen.getByText('Navigate to /sign-in')).toBeInTheDocument();
-      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+      expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
 
-    it('should not render children when not authenticated', () => {
-      renderWithRouter({ isAuthenticated: false, isLoading: false });
-      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('authenticated state', () => {
     it('should render children when authenticated', () => {
-      renderWithRouter({ isAuthenticated: true, isLoading: false });
-      expect(screen.getByText('Protected Content')).toBeInTheDocument();
+      renderWithRouter({ isAuthenticated: true, isLoading: false, pathname: '/' });
+      expect(screen.getByText('Route Content')).toBeInTheDocument();
       expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
     });
 
-    it('should not show loading message when authenticated', () => {
-      renderWithRouter({ isAuthenticated: true, isLoading: false });
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    it('should redirect to /sign-in for any non-sign-in route when not authenticated', () => {
+      renderWithRouter({ isAuthenticated: false, isLoading: false, pathname: '/dashboard' });
+      expect(screen.getByTestId('navigate')).toBeInTheDocument();
+      expect(screen.getByText('Navigate to /sign-in')).toBeInTheDocument();
+    });
+  });
+
+  describe('on sign-in page', () => {
+    it('should redirect to / when authenticated', () => {
+      renderWithRouter({ isAuthenticated: true, isLoading: false, pathname: '/sign-in' });
+      expect(screen.getByTestId('navigate')).toBeInTheDocument();
+      expect(screen.getByText('Navigate to /')).toBeInTheDocument();
+      expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
 
-    it('should not redirect when authenticated', () => {
-      renderWithRouter({ isAuthenticated: true, isLoading: false });
+    it('should render children when not authenticated', () => {
+      renderWithRouter({ isAuthenticated: false, isLoading: false, pathname: '/sign-in' });
+      expect(screen.getByText('Route Content')).toBeInTheDocument();
       expect(screen.queryByTestId('navigate')).not.toBeInTheDocument();
     });
   });
@@ -112,9 +117,9 @@ describe('ProtectedRoute', () => {
 
       rerender(
         <MemoryRouter>
-          <ProtectedRoute>
-            <div>Protected Content</div>
-          </ProtectedRoute>
+          <AuthCheckRoute>
+            <div>Route Content</div>
+          </AuthCheckRoute>
         </MemoryRouter>
       );
 
@@ -134,14 +139,14 @@ describe('ProtectedRoute', () => {
 
       rerender(
         <MemoryRouter>
-          <ProtectedRoute>
-            <div>Protected Content</div>
-          </ProtectedRoute>
+          <AuthCheckRoute>
+            <div>Route Content</div>
+          </AuthCheckRoute>
         </MemoryRouter>
       );
 
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-      expect(screen.getByText('Protected Content')).toBeInTheDocument();
+      expect(screen.getByText('Route Content')).toBeInTheDocument();
     });
   });
 });

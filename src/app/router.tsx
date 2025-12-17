@@ -2,24 +2,33 @@ import { createBrowserRouter } from 'react-router-dom';
 import { HomePage } from '@/pages/HomePage';
 import { SignIn } from '@/pages/SignIn';
 import { SignUp } from '@/pages/SignUp';
-import { ProtectedRoute } from '@/features/auth-flow/ProtectedRoute';
+import { ErrorPage } from '@/pages/ErrorPage';
+import { AuthCheckRoute } from '@/features/auth-flow/AuthCheckRoute';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ProtectedRoute>
+      <AuthCheckRoute>
         <HomePage />
-      </ProtectedRoute>
+      </AuthCheckRoute>
     ),
   },
   {
     path: '/sign-in',
-    element: <SignIn />,
+    element: (
+      <AuthCheckRoute>
+        <SignIn />
+      </AuthCheckRoute>
+    ),
   },
   {
     path: '/sign-up',
     element: <SignUp />,
+  },
+  {
+    path: '*',
+    element: <ErrorPage />,
   }
 ]);
 
