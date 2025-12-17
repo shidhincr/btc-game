@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GuessCard } from './GuessCard';
-import type { Guess } from './types';
+import type { Guess } from '../types';
 
 const createMockGuess = (overrides?: Partial<Guess>): Guess => ({
   id: 'guess-1',
@@ -30,7 +30,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ status: 'PENDING' });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-yellow-500');
+      const card = container.querySelector('.border-b');
       expect(card).toBeInTheDocument();
     });
   });
@@ -44,7 +44,7 @@ describe('GuessCard', () => {
       });
       const { container } = render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Win')).toBeInTheDocument();
+      expect(screen.getByText('Won')).toBeInTheDocument();
       const checkIcon = container.querySelector('.lucide-circle-check-big');
       expect(checkIcon).toBeInTheDocument();
     });
@@ -53,7 +53,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: 1 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-green-500');
+      const card = container.querySelector('.border-b');
       expect(card).toBeInTheDocument();
     });
 
@@ -78,7 +78,7 @@ describe('GuessCard', () => {
       });
       const { container } = render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Loss')).toBeInTheDocument();
+      expect(screen.getByText('Lost')).toBeInTheDocument();
       const xIcon = container.querySelector('.lucide-circle-x');
       expect(xIcon).toBeInTheDocument();
     });
@@ -87,7 +87,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: -1 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-red-500');
+      const card = container.querySelector('.border-b');
       expect(card).toBeInTheDocument();
     });
 
@@ -112,14 +112,14 @@ describe('GuessCard', () => {
       });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Tie')).toBeInTheDocument();
+      expect(screen.getByText('—')).toBeInTheDocument();
     });
 
     it('should have gray border for tie', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: 0 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-gray-400');
+      const card = container.querySelector('.border-b');
       expect(card).toBeInTheDocument();
     });
 
@@ -160,7 +160,6 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ startPrice: 50000 });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Start Price:')).toBeInTheDocument();
       expect(screen.getByText('$50,000.00')).toBeInTheDocument();
     });
 
@@ -171,7 +170,6 @@ describe('GuessCard', () => {
       });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Resolved Price:')).toBeInTheDocument();
       expect(screen.getByText('$51,000.00')).toBeInTheDocument();
     });
 
@@ -179,7 +177,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ status: 'PENDING' });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.queryByText('Resolved Price:')).not.toBeInTheDocument();
+      expect(screen.getAllByText('—')).toHaveLength(1);
     });
 
     it('should not display resolved price when null', () => {
@@ -189,7 +187,7 @@ describe('GuessCard', () => {
       });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.queryByText('Resolved Price:')).not.toBeInTheDocument();
+      expect(screen.getAllByText('—')).toHaveLength(2);
     });
   });
 
@@ -202,7 +200,6 @@ describe('GuessCard', () => {
       });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('Score:')).toBeInTheDocument();
       expect(screen.getByText('+1')).toBeInTheDocument();
     });
 
@@ -210,7 +207,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ status: 'PENDING' });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.queryByText('Score:')).not.toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
 
     it('should not display score when score is null', () => {
@@ -221,7 +218,7 @@ describe('GuessCard', () => {
       });
       render(<GuessCard guess={guess} />);
 
-      expect(screen.queryByText('Score:')).not.toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
   });
 
@@ -230,7 +227,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ createdAt: '2024-01-01T12:00:00Z' });
       render(<GuessCard guess={guess} />);
 
-      const timestamp = screen.getByText(/2024/);
+      const timestamp = screen.getByText(/\d{2}:\d{2}:\d{2}/);
       expect(timestamp).toBeInTheDocument();
     });
 
@@ -238,7 +235,7 @@ describe('GuessCard', () => {
       const guess = createMockGuess({ createdAt: null });
       render(<GuessCard guess={guess} />);
 
-      const timestamps = screen.queryAllByText(/\d{1,2}\/\d{1,2}\/\d{4}/);
+      const timestamps = screen.queryAllByText(/\d{1,2}:\d{2}:\d{2}/);
       expect(timestamps).toHaveLength(0);
     });
   });

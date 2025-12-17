@@ -56,14 +56,16 @@ describe('AuthCheckRoute', () => {
 
   describe('loading state', () => {
     it('should show loading message when isLoading is true', () => {
-      renderWithRouter({ isAuthenticated: false, isLoading: true });
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      const { container } = renderWithRouter({ isAuthenticated: false, isLoading: true });
+      const loader = container.querySelector('.lucide-loader-circle');
+      expect(loader).toBeInTheDocument();
       expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
 
     it('should not show protected content when loading', () => {
-      renderWithRouter({ isAuthenticated: true, isLoading: true });
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      const { container } = renderWithRouter({ isAuthenticated: true, isLoading: true });
+      const loader = container.querySelector('.lucide-loader-circle');
+      expect(loader).toBeInTheDocument();
       expect(screen.queryByText('Route Content')).not.toBeInTheDocument();
     });
   });
@@ -106,8 +108,8 @@ describe('AuthCheckRoute', () => {
 
   describe('state transitions', () => {
     it('should show loading first, then redirect when unauthenticated', () => {
-      const { rerender } = renderWithRouter({ isAuthenticated: false, isLoading: true });
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      const { rerender, container } = renderWithRouter({ isAuthenticated: false, isLoading: true });
+      expect(container.querySelector('.lucide-loader-circle')).toBeInTheDocument();
 
       vi.mocked(useSessionStore).mockReturnValue({
         isAuthenticated: false,
@@ -123,13 +125,13 @@ describe('AuthCheckRoute', () => {
         </MemoryRouter>
       );
 
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      expect(container.querySelector('.lucide-loader-circle')).not.toBeInTheDocument();
       expect(screen.getByTestId('navigate')).toBeInTheDocument();
     });
 
     it('should show loading first, then render content when authenticated', () => {
-      const { rerender } = renderWithRouter({ isAuthenticated: false, isLoading: true });
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      const { rerender, container } = renderWithRouter({ isAuthenticated: false, isLoading: true });
+      expect(container.querySelector('.lucide-loader-circle')).toBeInTheDocument();
 
       vi.mocked(useSessionStore).mockReturnValue({
         isAuthenticated: true,
@@ -145,7 +147,7 @@ describe('AuthCheckRoute', () => {
         </MemoryRouter>
       );
 
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      expect(container.querySelector('.lucide-loader-circle')).not.toBeInTheDocument();
       expect(screen.getByText('Route Content')).toBeInTheDocument();
     });
   });
