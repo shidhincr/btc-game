@@ -1,4 +1,4 @@
-import { Ticker } from '@/entities/bitcoin/Ticker';
+import { Ticker } from '@/entities/bitcoin/ui/Ticker';
 import { Scoreboard } from '@/entities/guess/Scoreboard';
 import { GameInteractionZone } from '@/features/make-guess/GameInteractionZone';
 import { cn } from '@/shared/lib/cn';

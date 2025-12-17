@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Loader2, TrendingUp, TrendingDown } from 'lucide-react';
-import { useBitcoinStore } from './store';
+import { useBitcoinStore } from '../store';
 import { useGuessStore } from '@/entities/guess/store';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
 import { cn } from '@/shared/lib/cn';

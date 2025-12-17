@@ -27,20 +27,6 @@ describe('useBitcoinStore', () => {
     });
   });
 
-  describe('setPrice', () => {
-    it('should set price and update lastUpdated', () => {
-      const beforeTime = Date.now();
-      useBitcoinStore.getState().setPrice(50000);
-      const afterTime = Date.now();
-
-      const state = useBitcoinStore.getState();
-      expect(state.price).toBe(50000);
-      expect(state.error).toBeNull();
-      expect(state.lastUpdated).toBeGreaterThanOrEqual(beforeTime);
-      expect(state.lastUpdated).toBeLessThanOrEqual(afterTime);
-    });
-  });
-
   describe('setError', () => {
     it('should set error message', () => {
       useBitcoinStore.getState().setError('Network error');

@@ -1,15 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Ticker } from './Ticker';
-import { useBitcoinStore } from './store';
+import { useBitcoinStore } from '../store';
 
-vi.mock('./store', () => ({
+vi.mock('../store', () => ({
   useBitcoinStore: vi.fn(),
 }));
 
 describe('Ticker', () => {
   const mockFetchPrice = vi.fn();
-  const mockSetPrice = vi.fn();
   const mockSetError = vi.fn();
   const mockSetLoading = vi.fn();
 
@@ -29,7 +28,6 @@ describe('Ticker', () => {
       error: null,
       lastUpdated: null,
       fetchPrice: mockFetchPrice,
-      setPrice: mockSetPrice,
       setError: mockSetError,
       setLoading: mockSetLoading,
       ...overrides,

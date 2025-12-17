@@ -10,7 +10,6 @@ interface BitcoinState {
 
 interface BitcoinStore extends BitcoinState {
   fetchPrice: () => Promise<void>;
-  setPrice: (price: number) => void;
   setError: (error: string | null) => void;
   setLoading: (isLoading: boolean) => void;
 }
@@ -44,13 +43,6 @@ export const useBitcoinStore = create<BitcoinStore>((set) => ({
       });
     }
   },
-
-  setPrice: (price) =>
-    set({
-      price,
-      lastUpdated: Date.now(),
-      error: null,
-    }),
 
   setError: (error) => set({ error }),
 
