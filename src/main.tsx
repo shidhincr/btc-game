@@ -6,7 +6,7 @@ import App from '@/app';
 import outputs from '../amplify_outputs.json';
 
 // Configure Amplify synchronously before rendering the app
-Amplify.configure(outputs.default || outputs);
+Amplify.configure(outputs);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
