@@ -136,6 +136,9 @@ todos:
   - id: todo-1765894919858-sswl9c9sz
     content: Add a link to signUp page from SignIn page. Also add the Logo to both SignIn and SignUp page
     status: completed
+  - id: todo-1765958312403-phsw8mrxr
+    content: Add E2E tests using playwright
+    status: pending
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan

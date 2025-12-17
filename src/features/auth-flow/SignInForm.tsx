@@ -43,7 +43,7 @@ export function SignInForm() {
             <Bitcoin className="h-7 w-7" />
           </div>
           <h1 className="text-2xl font-bold">
-            Btc<span className="text-orange-500">Guesser</span>
+            <span className="dark:text-white">Btc</span><span className="text-orange-500">Guesser</span>
           </h1>
         </div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
