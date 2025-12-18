@@ -1,4 +1,4 @@
-import { Header } from '@/shared/ui/Header';
+import { Header } from '@/widgets/header/Header';
 import { GameBoard } from '@/widgets/game-board/GameBoard';
 import { HistoryPanel } from '@/widgets/history-panel/HistoryPanel';
 

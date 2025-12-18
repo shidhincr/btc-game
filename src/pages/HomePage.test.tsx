@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { HomePage } from './HomePage';
 
-vi.mock('@/shared/ui/Header', () => ({
+vi.mock('@/widgets/header/Header', () => ({
   Header: () => <header>Header</header>,
 }));
 

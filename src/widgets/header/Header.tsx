@@ -1,5 +1,6 @@
 import { Bitcoin } from 'lucide-react';
 import { SignOutButton } from '@/features/auth-flow/SignOutButton';
+import { ThemeToggle } from '@/features/toggle-theme/ui/ThemeToggle';
 import { cn } from '@/shared/lib/cn';
 
 interface HeaderProps {
@@ -18,12 +19,13 @@ export function Header({ className }: HeaderProps) {
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md">
           <Bitcoin className="h-6 w-6" />
         </div>
-        <h1 className="text-xl font-bold">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           Btc<span className="text-orange-500">Guesser</span>
-      </h1>
+        </h1>
       </div>
       <div className="flex items-center gap-3">
-      <SignOutButton />
+        <ThemeToggle />
+        <SignOutButton />
       </div>
     </header>
   );

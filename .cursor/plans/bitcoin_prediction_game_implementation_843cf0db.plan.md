@@ -141,7 +141,7 @@ todos:
     status: pending
   - id: todo-1765958858485-78lnwol6n
     content: Dark/Light mode toggler
-    status: pending
+    status: completed
   - id: todo-1765989978594-ouiuntenm
     content: After token confirmation, the user should redirect to home page. There seems to be a bug need to fix it
     status: completed
@@ -475,4 +475,3 @@ src/
 3. **Foundation Phase**: FSD structure, shared utilities, base UI components
 4. **Routing Phase**: Set up react-router-dom, define routes, create protected route wrapper (can be done in parallel with foundation)
 5. **Core Features Phase**: Auth (uses routing) → Price Display → Game Mechanics → Resolution
-6. **Pages Phase**: Create HomePage, AuthPage, GamePage with routing integration
