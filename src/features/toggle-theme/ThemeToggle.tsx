@@ -1,5 +1,5 @@
 import { Moon, Sun } from 'lucide-react';
-import { useThemeStore } from '../store';
+import { useThemeStore } from './store';
 import { cn } from '@/shared/lib/cn';
 
 interface ThemeToggleProps {

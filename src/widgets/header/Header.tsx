@@ -1,6 +1,6 @@
 import { Bitcoin } from 'lucide-react';
 import { SignOutButton } from '@/features/auth-flow/SignOutButton';
-import { ThemeToggle } from '@/features/toggle-theme/ui/ThemeToggle';
+import { ThemeToggle } from '@/features/toggle-theme/ThemeToggle';
 import { cn } from '@/shared/lib/cn';
 
 interface HeaderProps {
