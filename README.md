@@ -1,75 +1,200 @@
-# React + TypeScript + Vite
+# Bitcoin Price Prediction Game 🎯₿
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A real-time Bitcoin price prediction game where users bet on whether BTC/USD will go UP or DOWN over 60-second intervals. Built with React, TypeScript, and AWS Amplify Gen 2.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Real-time BTC Price**: Live Bitcoin price from Coinbase API with auto-refresh
+- **Make Predictions**: Bet UP or DOWN on price movement
+- **60-Second Timer**: Visual countdown timer for each prediction round
+- **Score Tracking**: Win (+1), Lose (-1), or Tie (0) based on price movement
+- **Guess History**: View all past predictions with results
+- **Offline Resume**: Pending guesses resolve automatically when you return
+- **Dark/Light Mode**: Theme toggle for comfortable viewing
+- **User Authentication**: Secure sign-up/sign-in with AWS Cognito
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+| Category | Technology |
+|----------|------------|
+| Frontend | React 19, TypeScript, Vite |
+| Styling | TailwindCSS 4 |
+| State Management | Zustand |
+| Backend | AWS Amplify Gen 2 |
+| Database | DynamoDB (via Amplify Data) |
+| Authentication | AWS Cognito |
+| Price API | Coinbase |
+| Testing | Vitest, React Testing Library |
+| Icons | Lucide React |
 
-Note: This will impact Vite dev & build performances.
+## Architecture
 
-## Expanding the ESLint configuration
+The project follows [Feature-Sliced Design (FSD)](https://feature-sliced.design/) architecture:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── app/              # App initialization, routing, providers
+├── pages/            # Page components (HomePage, SignIn, SignUp)
+├── widgets/          # Composite UI blocks (GameBoard, Header, HistoryPanel)
+├── features/         # Business logic (auth-flow, make-guess, toggle-theme)
+├── entities/         # Domain models (bitcoin, guess, session)
+└── shared/           # Reusable utilities, UI components, API clients
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Prerequisites
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Node.js 18+
+- pnpm (recommended) or npm
+- AWS Account (for Amplify backend)
+- AWS CLI configured with credentials
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Installation
+
+1. **Clone the repository**
+
+```bash
+git clone <repository-url>
+cd btc-game
 ```
+
+2. **Install dependencies**
+
+```bash
+pnpm install
+```
+
+3. **Set up AWS Amplify backend**
+
+```bash
+npx ampx sandbox
+```
+
+This will deploy the backend resources and generate `amplify_outputs.json`.
+
+## Running the Application
+
+### Development
+
+```bash
+pnpm dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Production Build
+
+```bash
+pnpm build
+pnpm preview
+```
+
+## Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+## Game Mechanics
+
+### How to Play
+
+1. **Sign Up/Sign In**: Create an account or sign in
+2. **View Current Price**: See the live BTC/USD price
+3. **Make a Prediction**: Click UP (green) or DOWN (red)
+4. **Wait 60 Seconds**: Timer counts down while price is locked
+5. **See Result**: Win, lose, or tie based on price movement
+
+### Scoring
+
+| Result | Points | Condition |
+|--------|--------|-----------|
+| Win | +1 | Predicted direction matches price movement |
+| Loss | -1 | Predicted direction opposite to price movement |
+| Tie | 0 | Price unchanged after 60 seconds |
+
+### Offline Resume
+
+If you close the browser with an active prediction:
+- Your prediction is saved with `PENDING` status
+- When you return, if 60+ seconds have passed, it resolves automatically
+- Your score updates with the result
+
+## Project Structure
+
+### Key Directories
+
+| Path | Description |
+|------|-------------|
+| `amplify/` | AWS Amplify Gen 2 backend configuration |
+| `src/app/` | App entry point, router, providers |
+| `src/pages/` | Route page components |
+| `src/widgets/` | Major UI compositions |
+| `src/features/` | Business logic features |
+| `src/entities/` | Domain models and stores |
+| `src/shared/` | Reusable utilities and components |
+
+### Data Model
+
+**Guess** (stored in DynamoDB):
+- `startPrice`: Starting BTC price when guess was made
+- `direction`: `UP` or `DOWN`
+- `status`: `PENDING` or `RESOLVED`
+- `resolvedPrice`: Final BTC price after 60 seconds
+- `score`: Points earned (-1, 0, or +1)
+- `createdAt`: Timestamp of guess
+- Owner-based authorization (users only see their own guesses)
+
+## Routes
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | HomePage | Game board (authenticated users) or redirect to sign-in |
+| `/sign-in` | SignIn | Authentication page |
+| `/sign-up` | SignUp | Registration page |
+
+## Environment
+
+The application uses AWS Amplify's generated `amplify_outputs.json` for configuration. This file is automatically generated when running `npx ampx sandbox` and contains all necessary backend endpoints and configuration.
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm preview` | Preview production build |
+| `pnpm test` | Run tests |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm test:ui` | Run tests with Vitest UI |
+| `pnpm test:coverage` | Run tests with coverage report |
+| `pnpm lint` | Run ESLint |
+
+## My Development Workflow
+
+I developed this app mostly the AI-native way, extensively using Cursor for UI design and unit tests. The code is written using Agent mode, but I didn't let the Agent generate all the code.
+
+### The Workflow
+
+1. **PRD Creation**: Come up with an extensive PRD using Gemini or Claude UI. I do this by talking to the thinking model through back-and-forth questions and answers. This is the crucial part where I design the PRD with the right user stories.
+
+2. **Planning**: Once I have the detailed PRD, I feed it to Cursor plan mode. I carefully choose the right feature to work on and sometimes create smaller plans per feature.
+
+3. **Task Review**: Once the plan is ready, Cursor and I review the generated todo tasks and further optimize or break them down.
+
+4. **Parallel Development**: I select related tasks and build them in a new Agent. At a time, I run multiple Agents to evaluate and start the immediate bootstrap code for features. I usually do this in a `worktree` setup to avoid conflicts.
+
+5. **Code Review & Refinement**: I don't directly accept the logic written by AI (for UI and tests, I usually accept). The Agent mode window is where I talk to the Agent and refine the logic the way I want. It's 50-50 between using the Agent window and writing code myself in the Editor window.
+
+6. **Testing & Commits**: Every time a todo is completed, I add tests and make sure to commit them.
+
+7. **Guiding the Agent**: Anytime I find the agent is distracted, I guide it and create a rule to prevent future issues.

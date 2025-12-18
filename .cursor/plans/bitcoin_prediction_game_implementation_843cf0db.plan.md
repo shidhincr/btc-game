@@ -159,7 +159,7 @@ todos:
     status: pending
   - id: todo-1765990230725-3nzuqlvde
     content: Create a final readme file
-    status: pending
+    status: completed
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan
@@ -473,5 +473,3 @@ src/
 1. **Setup Phase**: Dependencies (including react-router-dom), TailwindCSS, Amplify Gen 2 initialization
 2. **Backend Phase**: Schema definition, auth setup, TypeScript types auto-generated
 3. **Foundation Phase**: FSD structure, shared utilities, base UI components
-4. **Routing Phase**: Set up react-router-dom, define routes, create protected route wrapper (can be done in parallel with foundation)
-5. **Core Features Phase**: Auth (uses routing) → Price Display → Game Mechanics → Resolution
