@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { compareDesc, parseISO } from 'date-fns';
 import { client } from '@/shared/api/amplify';
 import type { Guess, GuessState } from './types';
 
@@ -62,10 +63,8 @@ export const useGuessStore = create<GuessStore>((set, get) => ({
       const result = await client.models.Guess.list();
 
       if (result.data) {
-        const sortedGuesses = [...result.data].sort(
-          (a, b) =>
-            new Date(b.createdAt || '').getTime() -
-            new Date(a.createdAt || '').getTime()
+        const sortedGuesses = [...result.data].sort((a, b) =>
+          compareDesc(parseISO(a.createdAt || ''), parseISO(b.createdAt || ''))
         );
         setGuesses(sortedGuesses);
         setLoading(false);

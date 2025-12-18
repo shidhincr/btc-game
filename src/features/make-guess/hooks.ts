@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { formatISO } from 'date-fns';
 import { client } from '@/shared/api/amplify';
 import { getBitcoinPrice } from '@/shared/api/coinbase';
 import { useGuessStore } from '@/entities/guess/store';
@@ -33,7 +34,7 @@ export function useMakeGuess() {
       setError(null);
 
       try {
-        const now = new Date().toISOString();
+        const now = formatISO(new Date());
         const result = await client.models.Guess.create({
           startPrice,
           direction,

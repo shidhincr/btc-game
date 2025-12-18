@@ -3,28 +3,27 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { SignUpForm } from './SignUpForm';
-import { useSessionStore } from '@/entities/session/store';
-import { signUp, confirmSignUp, signIn } from 'aws-amplify/auth';
-import type { SignUpOutput, ConfirmSignUpOutput, SignInOutput } from 'aws-amplify/auth';
+import { signUp, confirmSignUp } from 'aws-amplify/auth';
+import type { SignUpOutput, ConfirmSignUpOutput } from 'aws-amplify/auth';
 
-vi.mock('@/entities/session/store', () => ({
-  useSessionStore: vi.fn(),
-}));
+const mockNavigate = vi.fn();
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 vi.mock('aws-amplify/auth', () => ({
   signUp: vi.fn(),
   confirmSignUp: vi.fn(),
-  signIn: vi.fn(),
 }));
 
 describe('SignUpForm', () => {
-  const mockCheckAuth = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useSessionStore).mockReturnValue({
-      checkAuth: mockCheckAuth,
-    } as ReturnType<typeof useSessionStore>);
   });
 
   const renderWithRouter = (component: React.ReactElement) => {
@@ -234,7 +233,6 @@ describe('SignUpForm', () => {
 
     it('should call confirmSignUp with correct code', async () => {
       vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
-      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
 
       await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
       await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
@@ -247,31 +245,27 @@ describe('SignUpForm', () => {
       });
     });
 
-    it('should call signIn after successful confirmation', async () => {
+    it('should show success message after confirmation', async () => {
       vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
-      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
 
       await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
       await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
 
       await waitFor(() => {
-        expect(signIn).toHaveBeenCalledWith({
-          username: 'test@example.com',
-          password: 'Password123!',
-        });
+        expect(screen.getByText('Email Confirmed!')).toBeInTheDocument();
+        expect(screen.getByText('Redirecting you to sign in...')).toBeInTheDocument();
       });
     });
 
-    it('should call checkAuth after successful sign in', async () => {
+    it('should redirect to sign-in after successful confirmation', async () => {
       vi.mocked(confirmSignUp).mockResolvedValue({} as ConfirmSignUpOutput);
-      vi.mocked(signIn).mockResolvedValue({} as SignInOutput);
 
       await userEvent.type(screen.getByLabelText('Confirmation Code'), '123456');
       await userEvent.click(screen.getByRole('button', { name: 'Confirm Sign Up' }));
 
       await waitFor(() => {
-        expect(mockCheckAuth).toHaveBeenCalled();
-      });
+        expect(mockNavigate).toHaveBeenCalledWith('/sign-in');
+      }, { timeout: 3000 });
     });
 
     it('should display error on confirmation failure', async () => {

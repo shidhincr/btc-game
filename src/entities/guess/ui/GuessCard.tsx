@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { ArrowUp, ArrowDown, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { formatCurrency } from '@/shared/lib/formatCurrency';
 import { cn } from '@/shared/lib/cn';
@@ -47,14 +48,7 @@ export function GuessCard({ guess, className }: GuessCardProps) {
 
       {/* Time */}
       <div className="font-mono text-sm text-slate-800 dark:text-slate-100">
-        {guess.createdAt
-          ? new Date(guess.createdAt).toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            })
-          : '—'}
+        {guess.createdAt ? format(new Date(guess.createdAt), 'HH:mm:ss') : '—'}
       </div>
 
       {/* Locked Price */}

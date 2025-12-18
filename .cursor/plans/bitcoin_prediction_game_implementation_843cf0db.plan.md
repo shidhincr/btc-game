@@ -48,7 +48,7 @@ todos:
       - setup-routing
   - id: bitcoin-price
     content: "Implement Bitcoin price display: Coinbase API integration, auto-refresh every 60s, Ticker component"
-    status: in_progress
+    status: completed
     dependencies:
       - entities-layer
       - shared-layer
@@ -142,6 +142,24 @@ todos:
   - id: todo-1765958858485-78lnwol6n
     content: Dark/Light mode toggler
     status: pending
+  - id: todo-1765989978594-ouiuntenm
+    content: After token confirmation, the user should redirect to home page. There seems to be a bug need to fix it
+    status: completed
+  - id: todo-1766052782758-amh2ijdfq
+    content: We need to add date-fns whenever we can. One example in GuessCard, we are doing manual
+    status: completed
+  - id: todo-1765990022377-teo3vy82b
+    content: The updateGuess is getting calleed multiple times. In the network requests, the only difference in the payload is the updatedAt. Need to check this
+    status: pending
+  - id: todo-1765990221144-umlug7eg1
+    content: Add the skeleton loader
+    status: pending
+  - id: todo-1765990225775-57wsf2jpt
+    content: Work on the performance improvements
+    status: pending
+  - id: todo-1765990230725-3nzuqlvde
+    content: Create a final readme file
+    status: pending
 ---
 
 # Bitcoin Price Prediction Game - Implementation Plan
@@ -190,6 +208,8 @@ graph TB
     routing --> Auth
 ```
 
+
+
 ## Phase 1: Project Foundation & Dependencies
 
 ### 1.1 Install Core Dependencies
@@ -221,7 +241,7 @@ graph TB
 Create `amplify/data/resource.ts`:
 
 - **Guess Model**: `startPrice` (float), `direction` (enum: UP/DOWN), `status` (enum: PENDING/RESOLVED), `resolvedPrice` (float), `score` (integer), `createdAt`, `updatedAt`, owner authorization
-  - Note: No Player model needed. Score is calculated by summing `score` field from all RESOLVED guesses for the user
+- Note: No Player model needed. Score is calculated by summing `score` field from all RESOLVED guesses for the user
 
 ### 2.2 Configure Authentication
 
@@ -249,7 +269,7 @@ Protected routes are implemented using a wrapper component that checks authentic
 
 ### 3.1 Create FSD Directory Structure
 
-```
+```javascript
 src/
   app/              # App providers (Amplify, theme)
   pages/           # Page compositions
@@ -258,6 +278,8 @@ src/
   entities/        # Domain models & UI
   shared/          # Reusable utilities
 ```
+
+
 
 ### 3.2 Shared Layer (`src/shared/`)
 
@@ -301,7 +323,7 @@ src/
 ### 4.1 Authentication Flow (`src/features/auth-flow/`)
 
 - Sign Up form (email + password) - rendered in `pages/SignUp`
-  - No Player creation needed - score is calculated from guesses
+- No Player creation needed - score is calculated from guesses
 - Sign In form (email + password) - rendered in `pages/SignIn`
 - Sign Out button with redirect to homepage (`/`)
 - Protected route wrapper component (redirects to `/sign-in` if not authenticated)
@@ -330,9 +352,9 @@ src/
 - 60-second countdown timer (circular progress or text)
 - Timer icon (lucide-react Timer)
 - Client-side resolution logic:
-  - Check if `Date.now() > createdAt + 60000`
-  - Fetch current Bitcoin price from Coinbase
-  - Compare with `startPrice`:
+- Check if `Date.now() > createdAt + 60000`
+- Fetch current Bitcoin price from Coinbase
+- Compare with `startPrice`:
     - Win: +1 point (UP && price increased, or DOWN && price decreased)
     - Loss: -1 point (opposite)
     - Tie: 0 points (price unchanged)
@@ -458,7 +480,3 @@ src/
 8. **Testing Phase**: Manual testing, edge case handling
 
 ## Notes
-
-- Client-side resolution is acceptable for MVP (as per PRD section 4.5)
-- Future enhancement: Move resolution to server-side Lambda "Sweeper" for security
-- Coinbase API endpoint: `https://api.exchange.coinbase.com/products/BTC-USD/ticker` or `https://api.coinbase.com/v2/exchange-rates?currency=BTC`

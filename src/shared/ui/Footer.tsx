@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import { cn } from '@/shared/lib/cn';
 
 interface FooterProps {
@@ -12,7 +13,7 @@ export function Footer({ className }: FooterProps) {
         className
       )}
     >
-      <p>© {new Date().getFullYear()} Bitcoin Prediction Game</p>
+      <p>© {format(new Date(), 'yyyy')} Bitcoin Prediction Game</p>
     </footer>
   );
 }

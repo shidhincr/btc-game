@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { signUp, confirmSignUp, signIn } from 'aws-amplify/auth';
-import { Bitcoin } from 'lucide-react';
-import { useSessionStore } from '@/entities/session/store';
+import { Link, useNavigate } from 'react-router-dom';
+import { signUp, confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
+import { Bitcoin, CheckCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
 import { cn } from '@/shared/lib/cn';
 
 export function SignUpForm() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -19,7 +19,9 @@ export function SignUpForm() {
   const [hasPasswordBlurred, setHasPasswordBlurred] = useState(false);
   const [hasConfirmPasswordBlurred, setHasConfirmPasswordBlurred] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
-  const { checkAuth } = useSessionStore();
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const passwordInputClassName = cn(
     'w-full px-3 py-2 border border-gray-300 rounded-md',
@@ -70,11 +72,10 @@ export function SignUpForm() {
           username: email,
           confirmationCode,
         });
-        await signIn({
-          username: email,
-          password,
-        });
-        await checkAuth();
+        setIsConfirmed(true);
+        setTimeout(() => {
+          navigate('/sign-in');
+        }, 2000);
       } else {
         const validationErrors = validatePassword(password);
         if (validationErrors.length > 0) {
@@ -107,12 +108,30 @@ export function SignUpForm() {
     }
   };
 
+  const handleResendCode = async () => {
+    setIsResending(true);
+    setError(null);
+    setResendSuccess(false);
+
+    try {
+      await resendSignUpCode({ username: email });
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 3000);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to resend confirmation code'
+      );
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-md">
       <div className="flex flex-col items-center mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-500 text-white shadow-md">
-            <Bitcoin className="h-7 w-7" />
+        <div className="flex gap-3 items-center mb-4">
+          <div className="flex justify-center items-center w-12 h-12 text-white bg-orange-500 rounded-lg shadow-md">
+            <Bitcoin className="w-7 h-7" />
           </div>
           <h1 className="text-2xl font-bold">
             <span className="dark:text-white">Btc</span><span className="text-orange-500">Guesser</span>
@@ -124,9 +143,23 @@ export function SignUpForm() {
       </div>
 
       <Card className="w-full">
+      {isConfirmed ? (
+        <div className="flex flex-col gap-4 items-center py-4">
+          <CheckCircle className="w-12 h-12 text-green-500" />
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Email Confirmed!
+            </h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Redirecting you to sign in...
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
       {error && (
         <div
-          className="mb-4 p-3 rounded-md bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+          className="p-3 mb-4 text-red-800 bg-red-50 rounded-md dark:bg-red-900/20 dark:text-red-400"
           role="alert"
         >
           {error}
@@ -137,7 +170,7 @@ export function SignUpForm() {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             Email
           </label>
@@ -149,7 +182,7 @@ export function SignUpForm() {
             required
             disabled={isLoading || needsConfirmation}
             className={cn(
-              'w-full px-3 py-2 border border-gray-300 rounded-md',
+              'px-3 py-2 w-full rounded-md border border-gray-300',
               'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
               'dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100',
               'disabled:opacity-50 disabled:cursor-not-allowed'
@@ -163,7 +196,7 @@ export function SignUpForm() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Password
               </label>
@@ -180,7 +213,7 @@ export function SignUpForm() {
                 placeholder="Enter your password"
               />
               {hasPasswordBlurred && passwordErrors.length > 0 && (
-                <ul className="mt-1 text-sm text-red-600 dark:text-red-400 list-disc list-inside">
+                <ul className="mt-1 text-sm list-disc list-inside text-red-600 dark:text-red-400">
                   {passwordErrors.map((err, index) => (
                     <li key={index}>{err}</li>
                   ))}
@@ -200,7 +233,7 @@ export function SignUpForm() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
               >
                 Confirm Password
               </label>
@@ -234,7 +267,7 @@ export function SignUpForm() {
           <div>
             <label
               htmlFor="confirmationCode"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Confirmation Code
             </label>
@@ -246,16 +279,32 @@ export function SignUpForm() {
               required
               disabled={isLoading}
               className={cn(
-                'w-full px-3 py-2 border border-gray-300 rounded-md',
+                'px-3 py-2 w-full rounded-md border border-gray-300',
                 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100',
                 'disabled:opacity-50 disabled:cursor-not-allowed'
               )}
               placeholder="Enter confirmation code from email"
             />
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Check your email for the confirmation code
-            </p>
+            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p>
+                Check your email for the confirmation code.{' '}
+                {resendSuccess ? (
+                  <span className="text-green-600 dark:text-green-400">
+                    Code sent!
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={isResending}
+                    className="font-medium text-orange-500 transition-colors hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 disabled:opacity-50"
+                  >
+                    {isResending ? 'Sending...' : 'Resend code'}
+                  </button>
+                )}
+              </p>
+            </div>
           </div>
         )}
 
@@ -278,12 +327,14 @@ export function SignUpForm() {
           Already have an account?{' '}
           <Link
             to="/sign-in"
-            className="font-medium text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-colors"
+            className="font-medium text-orange-500 transition-colors hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
           >
             Sign In
           </Link>
         </p>
       </div>
+        </>
+      )}
     </Card>
     </div>
   );
