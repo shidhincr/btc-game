@@ -30,8 +30,8 @@ export function HistoryList({ className }: HistoryListProps) {
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Header */}
-      <div className="grid grid-cols-6 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+      {/* Header - hidden on mobile */}
+      <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
         <div className="text-xs font-medium tracking-wider text-left uppercase text-slate-500">
           Prediction
         </div>
@@ -52,8 +52,8 @@ export function HistoryList({ className }: HistoryListProps) {
         </div>
       </div>
 
-      {/* Guess rows */}
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      {/* Guess rows - stacked cards on mobile, grid on desktop */}
+      <div className="flex flex-col gap-3 md:gap-0 md:divide-y md:divide-gray-200 md:dark:divide-gray-700">
         {guesses.map((guess) => (
           <GuessCard key={guess.id} guess={guess} />
         ))}

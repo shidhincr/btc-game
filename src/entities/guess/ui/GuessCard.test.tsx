@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { GuessCard } from './GuessCard';
 import type { Guess } from '../types';
 
@@ -15,23 +15,30 @@ const createMockGuess = (overrides?: Partial<Guess>): Guess => ({
   ...overrides,
 });
 
+const getDesktopLayout = (container: HTMLElement) => {
+  return container.querySelector('.md\\:grid') as HTMLElement;
+};
+
 describe('GuessCard', () => {
   describe('pending guess', () => {
     it('should display pending status with clock icon', () => {
       const guess = createMockGuess({ status: 'PENDING' });
       const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('Pending')).toBeInTheDocument();
+      expect(within(desktop).getByText('Pending')).toBeInTheDocument();
       const clockIcon = container.querySelector('.lucide-clock');
       expect(clockIcon).toBeInTheDocument();
     });
 
-    it('should have yellow border for pending guess', () => {
+    it('should render both mobile and desktop layouts', () => {
       const guess = createMockGuess({ status: 'PENDING' });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-b');
-      expect(card).toBeInTheDocument();
+      const mobileLayout = container.querySelector('.md\\:hidden');
+      const desktopLayout = container.querySelector('.hidden.md\\:grid');
+      expect(mobileLayout).toBeInTheDocument();
+      expect(desktopLayout).toBeInTheDocument();
     });
   });
 
@@ -43,18 +50,19 @@ describe('GuessCard', () => {
         resolvedPrice: 51000,
       });
       const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('Won')).toBeInTheDocument();
+      expect(within(desktop).getByText('Won')).toBeInTheDocument();
       const checkIcon = container.querySelector('.lucide-circle-check-big');
       expect(checkIcon).toBeInTheDocument();
     });
 
-    it('should have green border for win', () => {
+    it('should render desktop layout for win', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: 1 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-b');
-      expect(card).toBeInTheDocument();
+      const desktopLayout = container.querySelector('.hidden.md\\:grid');
+      expect(desktopLayout).toBeInTheDocument();
     });
 
     it('should display positive score with plus sign', () => {
@@ -63,9 +71,10 @@ describe('GuessCard', () => {
         score: 5,
         resolvedPrice: 51000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('+5')).toBeInTheDocument();
+      expect(within(desktop).getByText('+5')).toBeInTheDocument();
     });
   });
 
@@ -77,18 +86,19 @@ describe('GuessCard', () => {
         resolvedPrice: 49000,
       });
       const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('Lost')).toBeInTheDocument();
+      expect(within(desktop).getByText('Lost')).toBeInTheDocument();
       const xIcon = container.querySelector('.lucide-circle-x');
       expect(xIcon).toBeInTheDocument();
     });
 
-    it('should have red border for loss', () => {
+    it('should render desktop layout for loss', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: -1 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-b');
-      expect(card).toBeInTheDocument();
+      const desktopLayout = container.querySelector('.hidden.md\\:grid');
+      expect(desktopLayout).toBeInTheDocument();
     });
 
     it('should display negative score without plus sign', () => {
@@ -97,30 +107,32 @@ describe('GuessCard', () => {
         score: -3,
         resolvedPrice: 49000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('-3')).toBeInTheDocument();
+      expect(within(desktop).getByText('-3')).toBeInTheDocument();
     });
   });
 
   describe('resolved guess - tie', () => {
-    it('should display tie status with dash', () => {
+    it('should display tie status', () => {
       const guess = createMockGuess({
         status: 'RESOLVED',
         score: 0,
         resolvedPrice: 50000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(within(desktop).getByText('Tie')).toBeInTheDocument();
     });
 
-    it('should have gray border for tie', () => {
+    it('should render desktop layout for tie', () => {
       const guess = createMockGuess({ status: 'RESOLVED', score: 0 });
       const { container } = render(<GuessCard guess={guess} />);
 
-      const card = container.querySelector('.border-b');
-      expect(card).toBeInTheDocument();
+      const desktopLayout = container.querySelector('.hidden.md\\:grid');
+      expect(desktopLayout).toBeInTheDocument();
     });
 
     it('should display zero score', () => {
@@ -129,9 +141,10 @@ describe('GuessCard', () => {
         score: 0,
         resolvedPrice: 50000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('0')).toBeInTheDocument();
+      expect(within(desktop).getByText('0')).toBeInTheDocument();
     });
   });
 
@@ -139,8 +152,9 @@ describe('GuessCard', () => {
     it('should display UP direction with ArrowUp icon', () => {
       const guess = createMockGuess({ direction: 'UP' });
       const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('UP')).toBeInTheDocument();
+      expect(within(desktop).getByText('UP')).toBeInTheDocument();
       const arrowUpIcon = container.querySelector('.lucide-arrow-up');
       expect(arrowUpIcon).toBeInTheDocument();
     });
@@ -148,8 +162,9 @@ describe('GuessCard', () => {
     it('should display DOWN direction with ArrowDown icon', () => {
       const guess = createMockGuess({ direction: 'DOWN' });
       const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('DOWN')).toBeInTheDocument();
+      expect(within(desktop).getByText('DOWN')).toBeInTheDocument();
       const arrowDownIcon = container.querySelector('.lucide-arrow-down');
       expect(arrowDownIcon).toBeInTheDocument();
     });
@@ -158,9 +173,10 @@ describe('GuessCard', () => {
   describe('price display', () => {
     it('should always display start price', () => {
       const guess = createMockGuess({ startPrice: 50000 });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('$50,000.00')).toBeInTheDocument();
+      expect(within(desktop).getByText('$50,000.00')).toBeInTheDocument();
     });
 
     it('should display resolved price when resolved', () => {
@@ -168,9 +184,10 @@ describe('GuessCard', () => {
         status: 'RESOLVED',
         resolvedPrice: 51000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('$51,000.00')).toBeInTheDocument();
+      expect(within(desktop).getByText('$51,000.00')).toBeInTheDocument();
     });
 
     it('should show skeleton placeholder for resolved price when pending', () => {
@@ -199,9 +216,10 @@ describe('GuessCard', () => {
         score: 1,
         resolvedPrice: 51000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('+1')).toBeInTheDocument();
+      expect(within(desktop).getByText('+1')).toBeInTheDocument();
     });
 
     it('should show skeleton placeholder for score when pending', () => {
@@ -212,42 +230,47 @@ describe('GuessCard', () => {
       expect(skeletons.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('should not display score when score is null', () => {
+    it('should display zero when score is null', () => {
       const guess = createMockGuess({
         status: 'RESOLVED',
         score: null,
         resolvedPrice: 51000,
       });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      expect(screen.getByText('0')).toBeInTheDocument();
+      expect(within(desktop).getByText('0')).toBeInTheDocument();
     });
   });
 
   describe('timestamp display', () => {
     it('should display timestamp when createdAt exists', () => {
       const guess = createMockGuess({ createdAt: '2024-01-01T12:00:00Z' });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
+      const desktop = getDesktopLayout(container);
 
-      const timestamp = screen.getByText(/\d{2}:\d{2}:\d{2}/);
+      const timestamp = within(desktop).getByText(/\d{2}:\d{2}:\d{2}/);
       expect(timestamp).toBeInTheDocument();
     });
 
-    it('should not display timestamp when createdAt is null', () => {
+    it('should display dash when createdAt is null', () => {
       const guess = createMockGuess({ createdAt: null });
       render(<GuessCard guess={guess} />);
 
-      const timestamps = screen.queryAllByText(/\d{1,2}:\d{2}:\d{2}/);
-      expect(timestamps).toHaveLength(0);
+      const dashes = screen.getAllByText('—');
+      expect(dashes.length).toBeGreaterThan(0);
     });
   });
 
   describe('custom className', () => {
-    it('should apply custom className', () => {
+    it('should apply custom className to both layouts', () => {
       const guess = createMockGuess();
       const { container } = render(<GuessCard guess={guess} className="custom-class" />);
 
-      expect(container.firstChild).toHaveClass('custom-class');
+      const mobileLayout = container.querySelector('.md\\:hidden');
+      const desktopLayout = container.querySelector('.hidden.md\\:grid');
+      expect(mobileLayout).toHaveClass('custom-class');
+      expect(desktopLayout).toHaveClass('custom-class');
     });
   });
 });

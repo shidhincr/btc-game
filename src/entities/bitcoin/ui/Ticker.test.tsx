@@ -75,7 +75,9 @@ describe('Ticker', () => {
       mockStore({ price: 50000 });
       render(<Ticker />);
 
-      expect(screen.getByText(/btc\/usd/i)).toBeInTheDocument();
+      const labels = screen.getAllByText(/btc\/usd/i);
+      expect(labels.length).toBeGreaterThan(0);
+      expect(labels[0]).toBeInTheDocument();
     });
 
     it('should apply custom className', () => {

@@ -116,12 +116,12 @@ todos:
       - shared-layer
   - id: ui-polish
     content: "Polish UI: Responsive design, dark mode styling, loading states, error handling, animations"
-    status: in_progress
+    status: completed
     dependencies:
       - app-providers
   - id: testing
     content: "Manual testing: All user stories, edge cases, offline resume, score persistence"
-    status: pending
+    status: completed
     dependencies:
       - ui-polish
   - id: todo-1765860340941-17ivwajjd
@@ -153,10 +153,13 @@ todos:
     status: pending
   - id: todo-1765990221144-umlug7eg1
     content: Add the skeleton loader
-    status: pending
+    status: cancelled
   - id: todo-1765990225775-57wsf2jpt
     content: Work on the performance improvements
     status: pending
+  - id: todo-1766072311420-fjz67epno
+    content: Fix the issues with responsive design - Ticker, HistoryList
+    status: completed
   - id: todo-1765990230725-3nzuqlvde
     content: Create a final readme file
     status: completed
@@ -472,4 +475,3 @@ src/
 
 1. **Setup Phase**: Dependencies (including react-router-dom), TailwindCSS, Amplify Gen 2 initialization
 2. **Backend Phase**: Schema definition, auth setup, TypeScript types auto-generated
-3. **Foundation Phase**: FSD structure, shared utilities, base UI components
