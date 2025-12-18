@@ -5,6 +5,8 @@ import { getBitcoinPrice } from '@/shared/api/coinbase';
 import { useGuessStore } from '@/entities/guess/store';
 import type { Guess, GuessDirection, GuessResult } from '@/entities/guess/types';
 
+const RESULT_DISPLAY_DURATION_MS = 5000;
+
 function calculateGuessResult(
   direction: 'UP' | 'DOWN',
   startPrice: number,
@@ -27,7 +29,7 @@ function calculateGuessResult(
 }
 
 export function useMakeGuess() {
-  const { setCurrentGuess, setLoading, setError, clearGuess, fetchGuesses, isLoading, error } = useGuessStore();
+  const { setLoading, setError, fetchGuesses, setCurrentGuess, clearCurrentGuess, isLoading, error } = useGuessStore();
 
   const createGuess = useCallback(
     async (direction: GuessDirection, startPrice: number) => {
@@ -45,7 +47,7 @@ export function useMakeGuess() {
         if (result.data) {
           const guess = result.data;
           setCurrentGuess(guess);
-          setLoading(false);
+          await fetchGuesses();
           return guess;
         } else {
           throw new Error('Failed to create guess: No data returned');
@@ -60,7 +62,7 @@ export function useMakeGuess() {
         throw error;
       }
     },
-    [setCurrentGuess, setLoading, setError]
+    [setLoading, setError, fetchGuesses, setCurrentGuess]
   );
 
   const resolveGuess = useCallback(
@@ -92,16 +94,14 @@ export function useMakeGuess() {
         });
 
         if (updateResult.data) {
-          const updatedGuess = updateResult.data;
-          setCurrentGuess(updatedGuess);
-
+          setCurrentGuess(updateResult.data);
           await fetchGuesses();
 
           setTimeout(() => {
-            clearGuess();
-          }, 5000);
+            clearCurrentGuess();
+          }, RESULT_DISPLAY_DURATION_MS);
 
-          return updatedGuess;
+          return updateResult.data;
         } else {
           throw new Error('Failed to update guess: No data returned');
         }
@@ -116,7 +116,7 @@ export function useMakeGuess() {
         setLoading(false);
       }
     },
-    [setLoading, setError, setCurrentGuess, clearGuess, fetchGuesses]
+    [setLoading, setError, fetchGuesses, setCurrentGuess, clearCurrentGuess]
   );
 
   return {
@@ -126,4 +126,3 @@ export function useMakeGuess() {
     error,
   };
 }
-

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { useGuessStore } from '@/entities/guess/store';
@@ -9,17 +8,9 @@ interface HistoryListProps {
 }
 
 export function HistoryList({ className }: HistoryListProps) {
-  const { guesses, isLoading, fetchGuesses, currentGuess } = useGuessStore();
+  const { guesses, isLoading } = useGuessStore();
 
-  useEffect(() => {
-    fetchGuesses();
-  }, [fetchGuesses]);
-
-  const resolvedGuesses = guesses.filter(
-    (guess) => guess.status === 'RESOLVED'
-  );
-
-  if (isLoading && !currentGuess) {
+  if (isLoading && guesses.length === 0) {
     return (
       <div className={cn('flex justify-center items-center p-8', className)}>
         <Loader2 className="w-6 h-6 text-gray-500 animate-spin dark:text-gray-400" />
@@ -27,7 +18,7 @@ export function HistoryList({ className }: HistoryListProps) {
     );
   }
 
-  if (resolvedGuesses.length === 0) {
+  if (guesses.length === 0) {
     return (
       <div className={cn('flex flex-col gap-2 items-center p-8', className)}>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -63,7 +54,7 @@ export function HistoryList({ className }: HistoryListProps) {
 
       {/* Guess rows */}
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        {resolvedGuesses.map((guess) => (
+        {guesses.map((guess) => (
           <GuessCard key={guess.id} guess={guess} />
         ))}
       </div>

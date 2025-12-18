@@ -35,10 +35,10 @@ export function GuessResult({ className }: GuessResultProps) {
             <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             <span className="text-lg font-bold text-red-600 dark:text-red-400">
               You Lost
-          </span>
+            </span>
             <span className="text-sm font-semibold text-red-600 dark:text-red-400">
-            {score}
-          </span>
+              {score}
+            </span>
           </>
         ) : (
           <>
@@ -52,4 +52,3 @@ export function GuessResult({ className }: GuessResultProps) {
     </div>
   );
 }
-

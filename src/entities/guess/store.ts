@@ -4,26 +4,20 @@ import { client } from '@/shared/api/amplify';
 import type { Guess, GuessState } from './types';
 
 interface GuessStore extends GuessState {
-  setCurrentGuess: (guess: Guess | null) => void;
   setGuesses: (guesses: Guess[]) => void;
+  setCurrentGuess: (guess: Guess | null) => void;
   updateGuess: (guessId: string, updates: Partial<Guess>) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
-  clearGuess: () => void;
+  clearCurrentGuess: () => void;
   fetchGuesses: () => Promise<Guess[]>;
 }
 
 export const useGuessStore = create<GuessStore>((set, get) => ({
-  currentGuess: null,
   guesses: [],
+  currentGuess: null,
   isLoading: false,
   error: null,
-
-  setCurrentGuess: (guess) =>
-    set({
-      currentGuess: guess,
-      error: null,
-    }),
 
   setGuesses: (guesses) =>
     set({
@@ -31,31 +25,37 @@ export const useGuessStore = create<GuessStore>((set, get) => ({
       error: null,
     }),
 
+  setCurrentGuess: (guess) =>
+    set({
+      currentGuess: guess,
+      error: null,
+    }),
+
   updateGuess: (guessId, updates) =>
-    set((state) => ({
-      guesses: state.guesses.map((guess) =>
+    set((state) => {
+      const updatedGuesses = state.guesses.map((guess) =>
         guess.id === guessId ? { ...guess, ...updates } : guess
-      ),
-      currentGuess:
+      );
+      const updatedCurrentGuess =
         state.currentGuess?.id === guessId
           ? { ...state.currentGuess, ...updates }
-          : state.currentGuess,
-      error: null,
-    })),
+          : state.currentGuess;
+
+      return {
+        guesses: updatedGuesses,
+        currentGuess: updatedCurrentGuess,
+        error: null,
+      };
+    }),
 
   setLoading: (isLoading) => set({ isLoading }),
 
   setError: (error) => set({ error }),
 
-  clearGuess: () => set({
-      currentGuess: null,
-      error: null,
-      isLoading: false,
-    }),
-
+  clearCurrentGuess: () => set({ currentGuess: null }),
 
   fetchGuesses: async () => {
-    const { setGuesses, setLoading, setError } = get();
+    const { setGuesses, setLoading, setError, currentGuess } = get();
     setLoading(true);
     setError(null);
 
@@ -67,6 +67,14 @@ export const useGuessStore = create<GuessStore>((set, get) => ({
           compareDesc(parseISO(a.createdAt || ''), parseISO(b.createdAt || ''))
         );
         setGuesses(sortedGuesses);
+
+        if (currentGuess === null) {
+          const pendingGuess = sortedGuesses.find((g) => g.status === 'PENDING');
+          if (pendingGuess) {
+            set({ currentGuess: pendingGuess });
+          }
+        }
+
         setLoading(false);
         return sortedGuesses;
       } else {

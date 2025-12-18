@@ -173,11 +173,12 @@ describe('GuessCard', () => {
       expect(screen.getByText('$51,000.00')).toBeInTheDocument();
     });
 
-    it('should not display resolved price when pending', () => {
+    it('should show skeleton placeholder for resolved price when pending', () => {
       const guess = createMockGuess({ status: 'PENDING' });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
 
-      expect(screen.getAllByText('—')).toHaveLength(1);
+      const skeletons = container.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should not display resolved price when null', () => {
@@ -203,11 +204,12 @@ describe('GuessCard', () => {
       expect(screen.getByText('+1')).toBeInTheDocument();
     });
 
-    it('should not display score when pending', () => {
+    it('should show skeleton placeholder for score when pending', () => {
       const guess = createMockGuess({ status: 'PENDING' });
-      render(<GuessCard guess={guess} />);
+      const { container } = render(<GuessCard guess={guess} />);
 
-      expect(screen.getByText('0')).toBeInTheDocument();
+      const skeletons = container.querySelectorAll('.animate-pulse');
+      expect(skeletons.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should not display score when score is null', () => {

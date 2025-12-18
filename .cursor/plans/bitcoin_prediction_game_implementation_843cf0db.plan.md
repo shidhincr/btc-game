@@ -66,7 +66,7 @@ todos:
       - bitcoin-price
   - id: offline-resume
     content: "Implement offline resume: Check for PENDING guesses on load, auto-resolve if expired, update UI"
-    status: pending
+    status: completed
     dependencies:
       - resolve-guess-feature
   - id: game-board-widget
@@ -476,7 +476,3 @@ src/
 4. **Routing Phase**: Set up react-router-dom, define routes, create protected route wrapper (can be done in parallel with foundation)
 5. **Core Features Phase**: Auth (uses routing) → Price Display → Game Mechanics → Resolution
 6. **Pages Phase**: Create HomePage, AuthPage, GamePage with routing integration
-7. **Polish Phase**: History, offline resume, UI refinements
-8. **Testing Phase**: Manual testing, edge case handling
-
-## Notes

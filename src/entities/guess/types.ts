@@ -15,8 +15,8 @@ export interface GuessResult {
 }
 
 export interface GuessState {
-  currentGuess: Guess | null;
   guesses: Guess[];
+  currentGuess: Guess | null;
   isLoading: boolean;
   error: string | null;
 }

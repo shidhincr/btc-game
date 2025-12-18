@@ -19,7 +19,7 @@ export function Ticker({
   const { price, isLoading, error, fetchPrice } = useBitcoinStore();
   const { currentGuess } = useGuessStore();
 
-  const hasActiveGuess = currentGuess !== null && currentGuess.status === 'PENDING';
+  const hasActiveGuess = currentGuess !== null;
   const lockedPrice = hasActiveGuess ? currentGuess.startPrice : null;
   const priceColorClass =
     hasActiveGuess && lockedPrice !== null && price !== null

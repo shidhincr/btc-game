@@ -28,8 +28,8 @@ const createMockGuess = (overrides?: Partial<Guess>): Guess => ({
 describe('useGuessStore', () => {
   beforeEach(() => {
     useGuessStore.setState({
-      currentGuess: null,
       guesses: [],
+      currentGuess: null,
       isLoading: false,
       error: null,
     });
@@ -39,8 +39,8 @@ describe('useGuessStore', () => {
   describe('initial state', () => {
     it('should have correct initial state', () => {
       const state = useGuessStore.getState();
-      expect(state.currentGuess).toBeNull();
       expect(state.guesses).toEqual([]);
+      expect(state.currentGuess).toBeNull();
       expect(state.isLoading).toBe(false);
       expect(state.error).toBeNull();
     });
@@ -48,7 +48,7 @@ describe('useGuessStore', () => {
 
   describe('setCurrentGuess', () => {
     it('should set current guess', () => {
-      const guess = createMockGuess();
+      const guess = createMockGuess({ id: 'guess-1', status: 'PENDING' });
       useGuessStore.getState().setCurrentGuess(guess);
 
       const state = useGuessStore.getState();
@@ -57,12 +57,48 @@ describe('useGuessStore', () => {
     });
 
     it('should clear current guess when set to null', () => {
-      const guess = createMockGuess();
+      const guess = createMockGuess({ id: 'guess-1', status: 'PENDING' });
       useGuessStore.getState().setCurrentGuess(guess);
       useGuessStore.getState().setCurrentGuess(null);
 
       const state = useGuessStore.getState();
       expect(state.currentGuess).toBeNull();
+    });
+  });
+
+  describe('clearCurrentGuess', () => {
+    it('should clear current guess', () => {
+      const guess = createMockGuess({ id: 'guess-1', status: 'PENDING' });
+      useGuessStore.getState().setCurrentGuess(guess);
+      useGuessStore.getState().clearCurrentGuess();
+
+      const state = useGuessStore.getState();
+      expect(state.currentGuess).toBeNull();
+    });
+  });
+
+  describe('updateGuess with currentGuess', () => {
+    it('should update currentGuess when id matches', () => {
+      const guess = createMockGuess({ id: 'guess-1', status: 'PENDING' });
+      useGuessStore.getState().setGuesses([guess]);
+      useGuessStore.getState().setCurrentGuess(guess);
+
+      useGuessStore.getState().updateGuess('guess-1', { score: 1 });
+
+      const state = useGuessStore.getState();
+      expect(state.currentGuess?.score).toBe(1);
+    });
+
+    it('should not update currentGuess when id does not match', () => {
+      const guess1 = createMockGuess({ id: 'guess-1', status: 'PENDING' });
+      const guess2 = createMockGuess({ id: 'guess-2', status: 'PENDING' });
+      useGuessStore.getState().setGuesses([guess1, guess2]);
+      useGuessStore.getState().setCurrentGuess(guess1);
+
+      useGuessStore.getState().updateGuess('guess-2', { score: 1 });
+
+      const state = useGuessStore.getState();
+      expect(state.currentGuess?.score).toBeNull();
     });
   });
 
@@ -120,26 +156,6 @@ describe('useGuessStore', () => {
       expect(state.guesses[0].score).toBe(1);
       expect(state.guesses[1].score).toBeNull();
     });
-
-    it('should update currentGuess if it matches id', () => {
-      const guess = createMockGuess({ id: 'guess-1' });
-      useGuessStore.getState().setCurrentGuess(guess);
-
-      useGuessStore.getState().updateGuess('guess-1', { score: 1 });
-
-      const state = useGuessStore.getState();
-      expect(state.currentGuess?.score).toBe(1);
-    });
-
-    it('should not update currentGuess if id does not match', () => {
-      const guess = createMockGuess({ id: 'guess-1' });
-      useGuessStore.getState().setCurrentGuess(guess);
-
-      useGuessStore.getState().updateGuess('guess-2', { score: 1 });
-
-      const state = useGuessStore.getState();
-      expect(state.currentGuess?.score).toBeNull();
-    });
   });
 
   describe('setLoading', () => {
@@ -164,25 +180,6 @@ describe('useGuessStore', () => {
       expect(useGuessStore.getState().error).toBeNull();
     });
   });
-
-  describe('clearGuess', () => {
-    it('should clear current guess and reset state', () => {
-      const guess = createMockGuess();
-      useGuessStore.setState({
-        currentGuess: guess,
-        error: 'Some error',
-        isLoading: true,
-      });
-
-      useGuessStore.getState().clearGuess();
-
-      const state = useGuessStore.getState();
-      expect(state.currentGuess).toBeNull();
-      expect(state.error).toBeNull();
-      expect(state.isLoading).toBe(false);
-    });
-  });
-
 
   describe('fetchGuesses', () => {
     it('should fetch and set guesses successfully', async () => {

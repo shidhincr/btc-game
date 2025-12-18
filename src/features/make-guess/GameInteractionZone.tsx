@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 import { useMakeGuess } from './hooks';
@@ -15,17 +16,19 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
   const { createGuess, isLoading } = useMakeGuess();
   const { price: currentPrice, fetchPrice, isLoading: isPriceLoading } =
     useBitcoinStore();
-  const { currentGuess } = useGuessStore();
+  const { currentGuess, fetchGuesses } = useGuessStore();
 
-  const hasActiveGuess =
-    currentGuess !== null && currentGuess.status === 'PENDING';
-  const isResolved =
-    currentGuess !== null && currentGuess.status === 'RESOLVED';
+  useEffect(() => {
+    fetchGuesses();
+  }, [fetchGuesses]);
+
+  const isPending = currentGuess?.status === 'PENDING';
+  const isResolved = currentGuess?.status === 'RESOLVED';
   const isButtonDisabled =
-    hasActiveGuess || isLoading || isPriceLoading || currentPrice === null;
+    isPending || isLoading || isPriceLoading || currentPrice === null;
 
   const handleGuess = async (direction: 'UP' | 'DOWN') => {
-    if (hasActiveGuess) return;
+    if (isPending) return;
 
     await fetchPrice();
     const latestPrice = useBitcoinStore.getState().price;
@@ -34,14 +37,14 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
     await createGuess(direction, latestPrice);
   };
 
-  const isUpActive = hasActiveGuess && currentGuess?.direction === 'UP';
-  const isDownActive = hasActiveGuess && currentGuess?.direction === 'DOWN';
+  const isUpActive = isPending && currentGuess?.direction === 'UP';
+  const isDownActive = isPending && currentGuess?.direction === 'DOWN';
 
   return (
-    <div className={cn('flex flex-col items-center gap-6', className)}>
+    <div className={cn('flex flex-col gap-6 items-center', className)}>
       <div
         className={cn(
-          'flex flex-col items-center gap-6 py-8 sm:flex-row sm:justify-center'
+          'flex flex-col gap-6 items-center py-8 sm:flex-row sm:justify-center'
         )}
       >
         <div
@@ -56,11 +59,11 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
             isButtonDisabled && !isDownActive && 'opacity-50 cursor-not-allowed'
           )}
         >
-          <ArrowUp className="h-10 w-10" />
+          <ArrowUp className="w-10 h-10" />
           <span className="text-base font-bold uppercase">UP</span>
         </div>
 
-        {hasActiveGuess ? (
+        {isPending ? (
           <Timer />
         ) : isResolved ? (
           <GuessResult />
@@ -80,15 +83,15 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
             isButtonDisabled && !isUpActive && 'opacity-50 cursor-not-allowed'
           )}
         >
-          <ArrowDown className="h-10 w-10" />
+          <ArrowDown className="w-10 h-10" />
           <span className="text-base font-bold uppercase">DOWN</span>
         </div>
       </div>
 
       <div className="max-w-md text-center">
-        {hasActiveGuess && currentGuess?.startPrice ? (
-          <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3 text-gray-700 transition-all duration-300 dark:bg-gray-800/50 dark:text-gray-300">
-            <span className="text-sm font-semibold uppercase tracking-wider opacity-70">
+        {isPending && currentGuess?.startPrice ? (
+          <div className="flex gap-3 items-center px-4 py-3 text-gray-700 bg-gray-50 rounded-xl transition-all duration-300 dark:bg-gray-800/50 dark:text-gray-300">
+            <span className="text-sm font-semibold tracking-wider uppercase opacity-70">
               Locked At
             </span>
             <span className="text-lg font-bold tabular-nums">
@@ -105,4 +108,3 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
     </div>
   );
 }
-

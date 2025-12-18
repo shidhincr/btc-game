@@ -23,7 +23,7 @@ export function GuessCard({ guess, className }: GuessCardProps) {
   return (
     <div
       className={cn(
-        'grid grid-cols-6 gap-4 px-4 py-3 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-slate-700 border-b border-gray-200 dark:border-gray-700',
+        'grid grid-cols-6 gap-4 px-4 py-3 border-b border-gray-200 transition-all duration-300 hover:bg-gray-50 dark:hover:bg-slate-700 dark:border-gray-700',
         className
       )}
     >
@@ -31,16 +31,16 @@ export function GuessCard({ guess, className }: GuessCardProps) {
       <div className="flex items-center">
         <span
           className={cn(
-            'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold',
+            'inline-flex gap-1 items-center px-3 py-1 text-xs font-semibold rounded-full',
             isUp
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+              ? 'text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-400'
+              : 'text-red-800 bg-red-100 dark:bg-red-900/30 dark:text-red-400'
           )}
         >
           {isUp ? (
-            <ArrowUp className="h-3 w-3" />
+            <ArrowUp className="w-3 h-3" />
           ) : (
-            <ArrowDown className="h-3 w-3" />
+            <ArrowDown className="w-3 h-3" />
           )}
           {guess.direction}
         </span>
@@ -56,18 +56,20 @@ export function GuessCard({ guess, className }: GuessCardProps) {
         {formatCurrency(guess.startPrice)}
       </div>
 
-      {/* Resolved Price */}
       <div className="font-mono text-sm text-slate-800 dark:text-slate-100">
-        {guess.resolvedPrice !== null && guess.resolvedPrice !== undefined
-          ? formatCurrency(guess.resolvedPrice)
-          : '—'}
+        {isPending ? (
+          <div className="w-16 h-4 bg-gray-200 rounded animate-pulse dark:bg-gray-700" />
+        ) : guess.resolvedPrice ? (
+          formatCurrency(guess.resolvedPrice)
+        ) : (
+          '—'
+        )}
       </div>
 
-      {/* Result */}
       <div>
         {isPending ? (
-          <div className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
-            <Clock className="h-4 w-4" />
+          <div className="flex gap-1 items-center text-yellow-600 dark:text-yellow-400">
+            <Clock className="w-4 h-4 animate-pulse" />
             <span className="text-sm">Pending</span>
           </div>
         ) : (
@@ -81,12 +83,12 @@ export function GuessCard({ guess, className }: GuessCardProps) {
           >
             {isWin ? (
               <>
-                <CheckCircle className="h-4 w-4" />
+                <CheckCircle className="w-4 h-4" />
                 <span>Won</span>
               </>
             ) : isLoss ? (
               <>
-                <XCircle className="h-4 w-4" />
+                <XCircle className="w-4 h-4" />
                 <span>Lost</span>
               </>
             ) : (
@@ -105,8 +107,14 @@ export function GuessCard({ guess, className }: GuessCardProps) {
           !isWin && !isLoss && 'text-gray-600 dark:text-gray-400'
         )}
       >
-        {score > 0 ? '+' : ''}
-        {score}
+        {isPending ? (
+          <div className="ml-auto w-6 h-4 bg-gray-200 rounded animate-pulse dark:bg-gray-700" />
+        ) : (
+          <>
+            {score > 0 ? '+' : ''}
+            {score}
+          </>
+        )}
       </div>
     </div>
   );
