@@ -5,7 +5,7 @@ import { getBitcoinPrice } from '@/shared/api/coinbase';
 import { useGuessStore } from '@/entities/guess/store';
 import type { Guess, GuessDirection, GuessResult } from '@/entities/guess/types';
 
-const RESULT_DISPLAY_DURATION_MS = 5000;
+const RESULT_DISPLAY_DURATION_MS = 2000;
 
 function calculateGuessResult(
   direction: 'UP' | 'DOWN',

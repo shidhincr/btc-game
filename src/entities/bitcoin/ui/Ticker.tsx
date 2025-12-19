@@ -11,6 +11,8 @@ interface TickerProps {
   refreshInterval?: number;
 }
 
+const containerClasses = 'min-h-32 sm:min-h-36 md:min-h-44 lg:min-h-48 overflow-hidden relative p-4 sm:p-6 md:p-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg transition-all duration-300 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900';
+
 export function Ticker({
   className,
   autoRefresh = true,
@@ -49,7 +51,8 @@ export function Ticker({
     return (
       <div
         className={cn(
-          'flex gap-2 justify-center items-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg dark:border-slate-700 dark:from-slate-800 dark:to-slate-900',
+          containerClasses,
+          'flex gap-2 justify-center items-center',
           className
         )}
       >
@@ -65,7 +68,8 @@ export function Ticker({
     return (
       <div
         className={cn(
-          'flex gap-2 justify-center items-center p-4 sm:p-6 md:p-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg dark:border-slate-700 dark:from-slate-800 dark:to-slate-900',
+          containerClasses,
+          'flex gap-2 justify-center items-center',
           className
         )}
       >
@@ -79,7 +83,7 @@ export function Ticker({
   return (
     <div
       className={cn(
-        'overflow-hidden relative p-4 sm:p-6 md:p-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100 shadow-lg transition-all duration-300 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900',
+        containerClasses,
         className
       )}
     >
@@ -99,18 +103,22 @@ export function Ticker({
           <div className={cn('text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tabular-nums tracking-tight transition-colors duration-300', priceColorClass)}>
             {formatCurrency(price)}
           </div>
-          {showTrendIcon && (
-            <div className={cn('flex items-center justify-center transition-colors duration-300', priceColorClass)}>
-              {isTrendingUp ? (
-                <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20" />
-              ) : (
-                <TrendingDown className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20" />
-              )}
-            </div>
-          )}
+          <div
+            className={cn(
+              'flex items-center justify-center transition-all duration-300',
+              priceColorClass,
+              showTrendIcon ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            )}
+            aria-hidden={!showTrendIcon}
+          >
+            {isTrendingUp ? (
+              <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20" />
+            ) : (
+              <TrendingDown className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20" />
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

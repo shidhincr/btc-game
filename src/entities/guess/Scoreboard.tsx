@@ -25,17 +25,19 @@ export function Scoreboard({ className }: ScoreboardProps) {
           <span className="hidden sm:inline">Total Score</span>
           <span className="sm:hidden">Score</span>
         </span>
-        {isLoading ? (
-          <Loader2 className="mt-2 w-6 h-6 text-gray-500 animate-spin sm:mt-3 sm:h-8 sm:w-8 dark:text-gray-400" />
-        ) : error ? (
-          <span className="mt-2 text-xs font-semibold text-red-600 sm:mt-3 sm:text-sm dark:text-red-400">
-            Error
-          </span>
-        ) : (
-          <span className="mt-2 text-2xl font-black tabular-nums tracking-tight text-blue-700 sm:mt-3 sm:text-4xl md:text-5xl dark:text-blue-400">
-            {score}
-          </span>
-        )}
+        <div className="flex justify-center items-center mt-2 min-h-8 sm:mt-3 sm:min-h-10 md:min-h-12">
+          {isLoading ? (
+            <Loader2 className="w-6 h-6 text-gray-500 animate-spin sm:h-8 sm:w-8 dark:text-gray-400" />
+          ) : error ? (
+            <span className="text-xs font-semibold text-red-600 sm:text-sm dark:text-red-400">
+              Error
+            </span>
+          ) : (
+            <span className="text-2xl font-black tabular-nums tracking-tight text-blue-700 sm:text-4xl md:text-5xl dark:text-blue-400">
+              {score}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

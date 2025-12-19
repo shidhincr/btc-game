@@ -88,7 +88,7 @@ export function GameInteractionZone({ className }: GameInteractionZoneProps) {
         </div>
       </div>
 
-      <div className="max-w-md text-center">
+      <div className="flex justify-center items-center max-w-md text-center min-h-20 sm:min-h-14">
         {isPending && currentGuess?.startPrice ? (
           <div className="flex gap-3 items-center px-4 py-3 text-gray-700 bg-gray-50 rounded-xl transition-all duration-300 dark:bg-gray-800/50 dark:text-gray-300">
             <span className="text-sm font-semibold tracking-wider uppercase opacity-70">
